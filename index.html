@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velorix Solutions — eBay & eCommerce AI Agency</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --neon:#00ffe7;--neon2:#ff006e;--neon3:#7b00ff;
+  --gold:#ffd700;--dark:#000509;--dark2:#020d14;--dark3:#041020;
+  --panel:rgba(0,255,231,0.03);--border:rgba(0,255,231,0.12);
+  --text:#c8fff9;--gray:rgba(200,255,249,0.45);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;cursor:none;}
+
+/* ═══════════════ CURSOR ═══════════════ */
+#cursor{position:fixed;width:24px;height:24px;border:2px solid var(--neon);pointer-events:none;z-index:99999;left:-100px;top:-100px;transition:width .15s,height .15s,border-color .2s,background .3s;box-shadow:0 0 10px var(--neon),inset 0 0 5px rgba(0,255,231,0.1);}
+#cursor.hover{width:48px;height:48px;border-color:var(--gold);box-shadow:0 0 20px var(--gold);background:rgba(255,215,0,0.05);}
+#cursor.click{width:16px;height:16px;background:rgba(0,255,231,0.3);}
+
+/* ═══════════════ CANVAS ═══════════════ */
+#bgCanvas{position:fixed;inset:0;z-index:0;}
+.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:201;}
+.glitch-over{position:fixed;inset:0;pointer-events:none;z-index:200;animation:gflick 10s infinite;}
+@keyframes gflick{0%,94%,100%{opacity:0}95%{opacity:.03;background:rgba(0,255,231,.2);}97%{opacity:0}98%{opacity:.02;background:rgba(255,0,110,.1);}}
+
+/* ═══════════════ NAV ═══════════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 60px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,5,9,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all .3s;}
+.logo-wrap{display:flex;align-items:center;gap:14px;cursor:pointer;}
+.logo-box{width:38px;height:38px;border:2px solid var(--neon);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:15px;font-weight:900;color:var(--neon);box-shadow:0 0 14px var(--neon);clip-path:polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%);animation:lpulse 3s ease-in-out infinite;}
+@keyframes lpulse{0%,100%{box-shadow:0 0 14px var(--neon);}50%{box-shadow:0 0 28px var(--neon),0 0 50px rgba(0,255,231,.2);}}
+.logo-text{font-family:'Orbitron',monospace;font-weight:900;font-size:15px;letter-spacing:3px;color:#fff;}
+.logo-text span{color:var(--neon);}
+.nav-links{display:flex;gap:8px;list-style:none;}
+.nav-links a{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--gray);text-decoration:none;text-transform:uppercase;padding:8px 16px;border:1px solid transparent;transition:all .3s;position:relative;}
+.nav-links a:hover,.nav-links a.active{color:var(--neon);border-color:var(--border);}
+.nav-links a.active::before{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--neon);box-shadow:0 0 8px var(--neon);}
+.nav-cta{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:10px 24px;border:1px solid var(--neon);color:var(--neon);text-decoration:none;text-transform:uppercase;position:relative;overflow:hidden;transition:all .3s;cursor:pointer;background:none;}
+.nav-cta::before{content:'';position:absolute;inset:0;background:var(--neon);transform:translateX(-100%);transition:.3s;}
+.nav-cta:hover::before{transform:translateX(0);}
+.nav-cta span{position:relative;z-index:1;}
+.nav-cta:hover span{color:var(--dark);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+.hamburger span{width:24px;height:2px;background:var(--neon);transition:.3s;}
+
+/* ═══════════════ STATUS BAR ═══════════════ */
+.status-bar{position:fixed;bottom:0;left:0;right:0;z-index:1000;height:26px;background:rgba(0,255,231,0.03);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:24px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,231,0.35);letter-spacing:1px;overflow:hidden;}
+.s-dot{width:5px;height:5px;background:var(--neon);border-radius:50%;box-shadow:0 0 5px var(--neon);animation:blink 1.5s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.1;}}
+.s-time{margin-left:auto;}
+
+/* ═══════════════ PAGES ═══════════════ */
+.page{display:none;min-height:100vh;position:relative;z-index:10;padding-top:76px;padding-bottom:40px;}
+.page.active{display:block;}
+
+/* ═══════════════ HOME PAGE ═══════════════ */
+.hero{min-height:calc(100vh - 76px);display:flex;align-items:center;padding:60px;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;}
+.hero-tag{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--neon);margin-bottom:20px;opacity:0;animation:fadeUp .8s .2s forwards;}
+.hero-tag::before{content:'[ ';}
+.hero-tag::after{content:' ]';}
+.hero-title{font-family:'Orbitron',monospace;font-size:clamp(38px,5.5vw,76px);font-weight:900;line-height:.93;letter-spacing:-1px;margin-bottom:10px;opacity:0;animation:fadeUp .8s .4s forwards;}
+.hero-title .g{color:#fff;position:relative;}
+.hero-title .g::before,.hero-title .g::after{content:attr(data-t);position:absolute;top:0;left:0;width:100%;height:100%;}
+.hero-title .g::before{color:var(--neon2);animation:ga 5s infinite;clip-path:polygon(0 25%,100% 25%,100% 45%,0 45%);}
+.hero-title .g::after{color:var(--neon);animation:gb 5s infinite;clip-path:polygon(0 65%,100% 65%,100% 80%,0 80%);}
+@keyframes ga{0%,88%,100%{transform:translate(0);}90%{transform:translate(-3px,1px);}93%{transform:translate(3px,-1px);}}
+@keyframes gb{0%,88%,100%{transform:translate(0);}91%{transform:translate(3px,1px);}94%{transform:translate(-3px,-1px);}}
+.nt{color:var(--neon);text-shadow:0 0 20px var(--neon),0 0 40px rgba(0,255,231,.3);}
+.hl{-webkit-text-stroke:1px rgba(0,255,231,.4);color:transparent;}
+.hero-sub{font-size:clamp(18px,3vw,32px);font-weight:300;letter-spacing:6px;color:var(--gray);margin-bottom:28px;opacity:0;animation:fadeUp .8s .6s forwards;}
+.hero-desc{font-size:15px;line-height:1.85;color:var(--gray);max-width:480px;border-left:2px solid var(--neon);padding-left:18px;margin-bottom:44px;opacity:0;animation:fadeUp .8s .8s forwards;}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;opacity:0;animation:fadeUp .8s 1s forwards;}
+.btn-p{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:15px 32px;background:var(--neon);color:var(--dark);text-decoration:none;text-transform:uppercase;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:all .3s;cursor:pointer;border:none;}
+.btn-p:hover{box-shadow:0 0 30px var(--neon);transform:translateY(-2px);}
+.btn-s{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:15px 32px;border:1px solid rgba(0,255,231,.3);color:var(--neon);text-decoration:none;text-transform:uppercase;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:all .3s;cursor:pointer;background:none;}
+.btn-s:hover{border-color:var(--neon);box-shadow:0 0 20px rgba(0,255,231,.2);}
+
+/* HERO RIGHT CARD */
+.hcard{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(10px);padding:28px;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));position:relative;overflow:hidden;opacity:0;animation:fadeLeft .9s 1.2s forwards;}
+.hcard::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(0,255,231,.025),transparent,rgba(123,0,255,.025),transparent);animation:spin 10s linear infinite;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.hc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;position:relative;z-index:1;}
+.hc-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--neon);text-transform:uppercase;}
+.hc-live{display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:20px;position:relative;z-index:1;}
+.mbox{background:rgba(0,255,231,.04);border:1px solid rgba(0,255,231,.07);padding:18px 14px;transition:.3s;position:relative;overflow:hidden;}
+.mbox::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--neon);transition:.4s;}
+.mbox:hover::before{height:100%;}
+.mbox:hover{border-color:rgba(0,255,231,.25);background:rgba(0,255,231,.07);}
+.mval{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--neon);text-shadow:0 0 15px rgba(0,255,231,.4);line-height:1;}
+.mlabel{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gray);margin-top:5px;text-transform:uppercase;}
+.bars{position:relative;z-index:1;}
+.bar-row{margin-bottom:12px;}
+.bar-hd{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);margin-bottom:5px;}
+.bar-track{height:2px;background:rgba(0,255,231,.07);overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--neon3));box-shadow:0 0 6px var(--neon);width:0;transition:width 1.8s cubic-bezier(.16,1,.3,1);}
+.bar-fill.go{width:var(--w);}
+.corner-d{position:absolute;width:10px;height:10px;border-color:var(--neon);border-style:solid;border-width:0;}
+.tl{top:0;left:0;border-top-width:1px;border-left-width:1px;}
+.tr{top:0;right:0;border-top-width:1px;border-right-width:1px;}
+.bl{bottom:0;left:0;border-bottom-width:1px;border-left-width:1px;}
+.br{bottom:0;right:0;border-bottom-width:1px;border-right-width:1px;}
+
+/* HOME MARQUEE */
+.marquee{padding:24px 0;border-top:1px solid rgba(0,255,231,.06);border-bottom:1px solid rgba(0,255,231,.06);background:rgba(0,255,231,.01);overflow:hidden;}
+.mtrack{display:flex;gap:48px;animation:mrun 25s linear infinite;white-space:nowrap;}
+.mitem{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(0,255,231,.15);display:flex;align-items:center;gap:28px;flex-shrink:0;}
+.mitem .sep{color:var(--neon);font-size:8px;opacity:.5;}
+@keyframes mrun{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* HOME STATS */
+.home-stats{padding:80px 60px;background:linear-gradient(180deg,var(--dark2),var(--dark));}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.sbox{padding:44px 28px;border:1px solid rgba(0,255,231,.06);text-align:center;position:relative;overflow:hidden;opacity:0;transform:translateY(30px);transition:all .5s;}
+.sbox.vis{opacity:1;transform:translateY(0);}
+.sbox::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:50px;height:1px;background:var(--neon);box-shadow:0 0 6px var(--neon);}
+.snum{font-family:'Orbitron',monospace;font-size:clamp(32px,4vw,56px);font-weight:900;color:var(--neon);text-shadow:0 0 25px rgba(0,255,231,.3);line-height:1;margin-bottom:8px;}
+.slabel{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gray);text-transform:uppercase;}
+
+/* ═══════════════ SERVICES PAGE ═══════════════ */
+.page-hero{padding:60px 60px 40px;border-bottom:1px solid var(--border);}
+.page-hero-tag{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--neon);margin-bottom:14px;}
+.page-hero-tag::before{content:'// ';}
+.page-title{font-family:'Orbitron',monospace;font-size:clamp(36px,5vw,72px);font-weight:900;letter-spacing:-2px;line-height:.95;}
+.page-sub{font-size:16px;color:var(--gray);max-width:500px;margin-top:16px;line-height:1.7;}
+
+.svc-section{padding:60px;}
+.svc-big-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:2px;}
+.svc-card{background:var(--dark2);padding:44px 36px;border:1px solid rgba(0,255,231,.05);position:relative;overflow:hidden;transition:all .4s;opacity:0;transform:translateY(40px);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
+.svc-card.vis{opacity:1;transform:translateY(0);}
+.svc-card::before{content:'';position:absolute;top:0;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--neon3));transition:width .5s;box-shadow:0 0 8px var(--neon);}
+.svc-card:hover::before{width:100%;}
+.svc-card::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 0% 0%,rgba(0,255,231,.04),transparent 60%);opacity:0;transition:.4s;}
+.svc-card:hover::after{opacity:1;}
+.svc-card:hover{border-color:rgba(0,255,231,.18);}
+.sc-num{font-family:'Orbitron',monospace;font-size:52px;font-weight:900;color:rgba(0,255,231,.05);line-height:1;margin-bottom:-6px;transition:.4s;}
+.svc-card:hover .sc-num{color:rgba(0,255,231,.1);}
+.sc-icon{font-size:30px;margin-bottom:14px;filter:drop-shadow(0 0 6px rgba(0,255,231,.4));}
+.sc-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;margin-bottom:12px;color:#fff;letter-spacing:1px;}
+.sc-desc{font-size:14px;line-height:1.75;color:var(--gray);}
+.sc-features{margin-top:20px;display:flex;flex-direction:column;gap:8px;}
+.sc-feat{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(0,255,231,.5);display:flex;align-items:center;gap:8px;}
+.sc-feat::before{content:'>';color:var(--neon);}
+.sc-price{margin-top:24px;padding-top:16px;border-top:1px solid rgba(0,255,231,.08);}
+.sc-from{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:2px;}
+.sc-amount{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;color:var(--gold);}
+
+/* PRICING SECTION */
+.pricing-section{padding:60px;background:var(--dark2);}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:48px;}
+.price-card{padding:44px 32px;border:1px solid rgba(0,255,231,.08);position:relative;overflow:hidden;opacity:0;transform:translateY(30px);transition:all .5s;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);}
+.price-card.vis{opacity:1;transform:translateY(0);}
+.price-card.featured{border-color:rgba(0,255,231,.3);background:rgba(0,255,231,.03);}
+.price-card.featured::before{content:'POPULAR';position:absolute;top:16px;right:16px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dark);background:var(--neon);padding:4px 10px;}
+.pc-name{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:2px;color:var(--neon);margin-bottom:8px;}
+.pc-price{font-family:'Orbitron',monospace;font-size:48px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;}
+.pc-price sup{font-size:20px;vertical-align:top;margin-top:12px;color:var(--gray);}
+.pc-period{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:2px;margin-bottom:24px;}
+.pc-features{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+.pc-feat{font-size:14px;color:var(--gray);display:flex;align-items:center;gap:10px;}
+.pc-feat::before{content:'✓';color:var(--neon);font-weight:700;flex-shrink:0;}
+
+/* ═══════════════ ABOUT PAGE ═══════════════ */
+.about-hero{padding:60px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.founder-visual{position:relative;}
+.founder-frame{position:relative;width:100%;max-width:380px;}
+.founder-img-wrap{width:100%;aspect-ratio:3/4;border:1px solid var(--border);position:relative;overflow:hidden;clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));}
+.founder-img-wrap img{width:100%;height:100%;object-fit:cover;filter:grayscale(20%) contrast(1.1);}
+.founder-img-placeholder{width:100%;height:100%;background:linear-gradient(135deg,var(--dark2),var(--dark3));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.founder-placeholder-icon{font-size:80px;opacity:.3;}
+.founder-placeholder-text{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;}
+.founder-glow{position:absolute;inset:-20px;background:radial-gradient(ellipse at center,rgba(0,255,231,.06),transparent 70%);pointer-events:none;}
+.founder-badge{position:absolute;bottom:-16px;right:-16px;background:var(--dark2);border:1px solid var(--border);padding:16px 20px;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));}
+.fb-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--neon);margin-bottom:4px;}
+.fb-name{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:#fff;}
+.fb-role{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;margin-top:4px;}
+.corner-d.f{border-color:var(--neon);}
+.scan-line{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon),transparent);animation:scan 3s ease-in-out infinite;opacity:.6;}
+@keyframes scan{0%{top:0;opacity:.8;}100%{top:100%;opacity:0;}}
+
+.about-content{}
+.about-content .page-hero-tag{margin-bottom:8px;}
+.about-title{font-family:'Orbitron',monospace;font-size:clamp(32px,4vw,56px);font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:24px;}
+.about-bio{font-size:16px;line-height:1.85;color:var(--gray);margin-bottom:20px;}
+.about-skills{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:32px;}
+.skill-item{padding:16px 20px;border:1px solid rgba(0,255,231,.07);background:rgba(0,255,231,.02);clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));transition:.3s;}
+.skill-item:hover{border-color:rgba(0,255,231,.2);background:rgba(0,255,231,.04);}
+.sk-name{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#fff;margin-bottom:8px;}
+.sk-bar{height:2px;background:rgba(0,255,231,.1);}
+.sk-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--neon3));box-shadow:0 0 6px var(--neon);width:0;transition:width 1.5s .5s cubic-bezier(.16,1,.3,1);}
+.sk-fill.go{width:var(--w);}
+
+/* ABOUT STORY */
+.about-story{padding:60px;background:var(--dark2);}
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:48px;}
+.story-card{padding:36px;border:1px solid rgba(0,255,231,.07);position:relative;opacity:0;transform:translateX(-30px);transition:all .6s;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);}
+.story-card.right{transform:translateX(30px);}
+.story-card.vis{opacity:1;transform:translateX(0);}
+.st-year{font-family:'Orbitron',monospace;font-size:48px;font-weight:900;color:rgba(0,255,231,.07);line-height:1;margin-bottom:-8px;}
+.st-title{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--neon);margin-bottom:12px;}
+.st-text{font-size:15px;line-height:1.75;color:var(--gray);}
+
+/* ABOUT VALUES */
+.values-section{padding:60px;}
+.values-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:48px;}
+.val-card{padding:36px 28px;border:1px solid rgba(0,255,231,.06);text-align:center;opacity:0;transform:translateY(30px);transition:all .5s;position:relative;overflow:hidden;}
+.val-card.vis{opacity:1;transform:translateY(0);}
+.val-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon),transparent);transform:scaleX(0);transition:.4s;}
+.val-card:hover::before{transform:scaleX(1);}
+.val-icon{font-size:36px;margin-bottom:16px;filter:drop-shadow(0 0 8px rgba(0,255,231,.4));}
+.val-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:#fff;margin-bottom:10px;}
+.val-text{font-size:13px;color:var(--gray);line-height:1.65;}
+
+/* ═══════════════ CONTACT PAGE ═══════════════ */
+.contact-section{padding:60px;display:grid;grid-template-columns:1fr 1fr;gap:60px;}
+.contact-info{}
+.contact-info .page-title{margin-bottom:20px;}
+.contact-desc{font-size:16px;color:var(--gray);line-height:1.75;margin-bottom:40px;}
+.contact-items{display:flex;flex-direction:column;gap:16px;}
+.citem{display:flex;align-items:flex-start;gap:20px;padding:20px 24px;border:1px solid rgba(0,255,231,.07);background:rgba(0,255,231,.02);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:.3s;opacity:0;transform:translateX(-20px);}
+.citem.vis{opacity:1;transform:translateX(0);}
+.citem:hover{border-color:rgba(0,255,231,.2);}
+.ci-icon{width:44px;height:44px;border:1px solid rgba(0,255,231,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;clip-path:polygon(10% 0,90% 0,100% 10%,100% 90%,90% 100%,10% 100%,0 90%,0 10%);}
+.ci-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--neon);margin-bottom:4px;text-transform:uppercase;}
+.ci-val{font-size:15px;color:#fff;font-weight:600;}
+
+.contact-form{background:var(--dark2);padding:40px;border:1px solid var(--border);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));position:relative;}
+.cf-title{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--neon);margin-bottom:28px;letter-spacing:1px;}
+.form-group{margin-bottom:20px;}
+.form-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:8px;display:block;}
+.form-input{width:100%;background:rgba(0,255,231,.03);border:1px solid rgba(0,255,231,.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;padding:12px 16px;outline:none;transition:.3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+.form-input:focus{border-color:var(--neon);box-shadow:0 0 12px rgba(0,255,231,.1);}
+textarea.form-input{resize:vertical;min-height:120px;}
+.form-btn{width:100%;font-family:'Orbitron',monospace;font-size:12px;font-weight:700;letter-spacing:2px;padding:16px;background:var(--neon);color:var(--dark);border:none;text-transform:uppercase;cursor:pointer;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:.3s;margin-top:8px;}
+.form-btn:hover{box-shadow:0 0 30px var(--neon);transform:translateY(-2px);}
+
+/* SOCIAL LINKS */
+.social-section{padding:40px 60px;border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.social-label{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gray);text-transform:uppercase;margin-right:8px;}
+.social-btn{display:flex;align-items:center;gap:10px;padding:10px 20px;border:1px solid rgba(0,255,231,.1);color:var(--gray);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:.3s;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);}
+.social-btn:hover{border-color:var(--neon);color:var(--neon);}
+
+/* ═══════════════ SECTION SHARED ═══════════════ */
+.sec-wrap{padding:60px;}
+.sec-tag{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--neon);margin-bottom:12px;opacity:0;transform:translateY(20px);transition:.6s;}
+.sec-tag::before{content:'// ';}
+.sec-tag.vis{opacity:1;transform:translateY(0);}
+.sec-h{font-family:'Orbitron',monospace;font-size:clamp(28px,4vw,52px);font-weight:900;letter-spacing:-1px;line-height:1;opacity:0;transform:translateY(20px);transition:.6s .1s;}
+.sec-h.vis{opacity:1;transform:translateY(0);}
+.neon-t{color:var(--neon);text-shadow:0 0 20px rgba(0,255,231,.3);}
+
+/* ═══════════════ FOOTER ═══════════════ */
+footer{padding:40px 60px;border-top:1px solid rgba(0,255,231,.07);background:var(--dark2);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;position:relative;z-index:10;}
+.foot-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:16px;letter-spacing:3px;}
+.foot-logo span{color:var(--neon);text-shadow:0 0 8px rgba(0,255,231,.4);}
+.foot-links{display:flex;gap:24px;}
+.foot-links a{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gray);text-decoration:none;text-transform:uppercase;transition:.3s;cursor:pointer;}
+.foot-links a:hover{color:var(--neon);}
+.foot-right{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(200,255,249,.2);text-align:right;}
+
+/* ═══════════════ ANIMATIONS ═══════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeLeft{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+/* ═══════════════ ORDER MODAL ═══════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,5,9,0.92);z-index:5000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--dark2);border:1px solid var(--border);width:90%;max-width:680px;max-height:88vh;overflow-y:auto;clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));position:relative;animation:modalIn .4s ease;}
+@keyframes modalIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.modal-header{padding:28px 32px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--dark2);z-index:1;}
+.modal-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--neon);letter-spacing:2px;}
+.modal-close{width:32px;height:32px;border:1px solid var(--border);background:none;color:var(--gray);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.3s;clip-path:polygon(10% 0,90% 0,100% 10%,100% 90%,90% 100%,10% 100%,0 90%,0 10%);}
+.modal-close:hover{border-color:var(--neon2);color:var(--neon2);}
+.modal-body{padding:28px 32px;}
+
+/* ORDER PACKAGES */
+.order-pkgs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:28px;}
+.order-pkg{padding:20px;border:2px solid rgba(0,255,231,.08);cursor:pointer;transition:.3s;text-align:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));}
+.order-pkg:hover{border-color:rgba(0,255,231,.3);}
+.order-pkg.selected{border-color:var(--neon);background:rgba(0,255,231,.05);box-shadow:0 0 16px rgba(0,255,231,.1);}
+.pkg-name{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--neon);letter-spacing:2px;margin-bottom:6px;}
+.pkg-price{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:#fff;line-height:1;}
+.pkg-price sup{font-size:12px;color:var(--gray);}
+.pkg-desc{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gray);letter-spacing:1px;margin-top:6px;}
+
+/* ORDER FORM */
+.order-section-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--neon);text-transform:uppercase;margin-bottom:14px;}
+.order-section-title::before{content:'// ';}
+.order-features{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;padding:16px;background:rgba(0,255,231,.02);border:1px solid rgba(0,255,231,.06);}
+.order-feat{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gray);display:flex;align-items:center;gap:8px;}
+.order-feat.included::before{content:'✓';color:var(--neon);}
+.order-feat.excluded{opacity:.4;}
+.order-feat.excluded::before{content:'✗';color:var(--neon2);}
+.order-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.order-summary{background:rgba(0,255,231,.03);border:1px solid rgba(0,255,231,.1);padding:20px;margin:20px 0;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);}
+.os-row{display:flex;justify-content:space-between;margin-bottom:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gray);}
+.os-total{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(0,255,231,.1);font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:#fff;}
+.os-total span:last-child{color:var(--neon);}
+.order-btn{width:100%;font-family:'Orbitron',monospace;font-size:12px;font-weight:700;letter-spacing:2px;padding:18px;background:var(--neon);color:var(--dark);border:none;text-transform:uppercase;cursor:pointer;transition:.3s;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);}
+.order-btn:hover{box-shadow:0 0 30px var(--neon);transform:translateY(-2px);}
+.order-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);text-align:center;margin-top:12px;letter-spacing:1px;}
+
+/* SUCCESS SCREEN */
+.success-screen{display:none;text-align:center;padding:40px;}
+.success-screen.show{display:block;}
+.success-icon{font-size:60px;margin-bottom:20px;animation:bounce .6s ease;}
+@keyframes bounce{0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
+.success-title{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:var(--neon);margin-bottom:12px;}
+.success-text{color:var(--gray);font-size:15px;line-height:1.7;margin-bottom:24px;}
+.success-order-id{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--neon);background:rgba(0,255,231,.05);border:1px solid rgba(0,255,231,.2);padding:10px 20px;display:inline-block;letter-spacing:2px;margin-bottom:24px;}
+
+/* ORDER NOW BUTTONS */
+.order-now-btn{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:12px 24px;background:var(--neon);color:var(--dark);border:none;text-transform:uppercase;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);transition:.3s;cursor:pointer;margin-top:16px;width:100%;}
+.order-now-btn:hover{box-shadow:0 0 20px var(--neon);}
+
+/* ═══════════════ MOBILE ═══════════════ */
+@media(max-width:900px){
+  nav{padding:14px 20px;}
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  .hero{padding:30px 20px;}
+  .hero-grid{grid-template-columns:1fr;}
+  .hero-right-wrap{display:none;}
+  .home-stats{padding:60px 20px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .page-hero{padding:40px 20px 30px;}
+  .svc-section{padding:40px 20px;}
+  .svc-big-grid{grid-template-columns:1fr;}
+  .pricing-section{padding:40px 20px;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .about-hero{grid-template-columns:1fr;padding:40px 20px;gap:40px;}
+  .founder-visual{max-width:280px;margin:0 auto;}
+  .about-story{padding:40px 20px;}
+  .story-grid{grid-template-columns:1fr;gap:20px;}
+  .values-section{padding:40px 20px;}
+  .values-grid{grid-template-columns:1fr 1fr;}
+  .contact-section{grid-template-columns:1fr;padding:40px 20px;}
+  .social-section{padding:30px 20px;}
+  footer{grid-template-columns:1fr;gap:20px;padding:30px 20px;text-align:center;}
+  .foot-links{justify-content:center;}
+  .foot-right{text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<canvas id="bgCanvas"></canvas>
+<div class="scanlines"></div>
+<div class="glitch-over"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="logo-wrap" onclick="showPage('home')">
+    <div class="logo-box">V</div>
+    <div class="logo-text">VELORIX<span>.</span></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#" class="active" data-page="home" onclick="showPage('home');return false;">Home</a></li>
+    <li><a href="#" data-page="services" onclick="showPage('services');return false;">Services</a></li>
+    <li><a href="#" data-page="about" onclick="showPage('about');return false;">About</a></li>
+    <li><a href="#" data-page="contact" onclick="showPage('contact');return false;">Contact</a></li>
+    <li><a href="#" data-page="order" onclick="showPage('order');return false;" style="color:var(--neon);border:1px solid rgba(0,255,231,0.3);padding:8px 16px;">Order Now</a></li>
+  </ul>
+  <button class="nav-cta" onclick="showPage('order')"><span>Order Now</span></button>
+  <div class="hamburger" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="s-dot"></div>
+  <span>SYSTEM ONLINE</span>
+  <span>// VELORIX SOLUTIONS</span>
+  <span>// eBay · Amazon · Shopify · AI</span>
+  <span class="s-time" id="sTime">00:00:00</span>
+</div>
+
+<!-- ═══════════════════ HOME PAGE ═══════════════════ -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="hero-tag">SYSTEM INITIALIZED · ECOMMERCE AI AGENCY</div>
+        <h1 class="hero-title">
+          <span style="display:block"><span class="g" data-t="VELORIX">VELORIX</span></span>
+          <span class="nt" style="display:block">SOLUTIONS</span>
+          <span class="hl" style="display:block">AGENCY</span>
+        </h1>
+        <div class="hero-sub">eBay · AI · AUTOMATION</div>
+        <p class="hero-desc">We scale eBay stores using AI-powered automation. Product research, listing optimization, store management — all on autopilot. Welcome to the future of eCommerce.</p>
+        <div class="hero-btns">
+          <button class="btn-p" onclick="showPage('services')">Explore Services</button>
+          <button class="btn-s" onclick="showPage('contact')">Contact Us</button>
+        </div>
+      </div>
+      <div class="hero-right-wrap">
+        <div class="hcard">
+          <div class="corner-d tl"></div><div class="corner-d tr"></div>
+          <div class="corner-d bl"></div><div class="corner-d br"></div>
+          <div class="scan-line"></div>
+          <div class="hc-header">
+            <div class="hc-title">// PERFORMANCE MATRIX</div>
+            <div class="hc-live"><div class="s-dot"></div> LIVE DATA</div>
+          </div>
+          <div class="metrics-grid">
+            <div class="mbox"><div class="mval" data-count="100">0</div><div class="mlabel">Products Listed</div></div>
+            <div class="mbox"><div class="mval" data-count="1">0</div><div class="mlabel">Years Active</div></div>
+            <div class="mbox"><div class="mval">24/7</div><div class="mlabel">AI Runtime</div></div>
+            <div class="mbox"><div class="mval">UK/US</div><div class="mlabel">Markets</div></div>
+          </div>
+          <div class="bars">
+            <div class="bar-row"><div class="bar-hd"><span>Product Research</span><span>98%</span></div><div class="bar-track"><div class="bar-fill" style="--w:98%"></div></div></div>
+            <div class="bar-row"><div class="bar-hd"><span>Store Management</span><span>95%</span></div><div class="bar-track"><div class="bar-fill" style="--w:95%"></div></div></div>
+            <div class="bar-row"><div class="bar-hd"><span>AI Automation</span><span>92%</span></div><div class="bar-track"><div class="bar-fill" style="--w:92%"></div></div></div>
+            <div class="bar-row"><div class="bar-hd"><span>Client Satisfaction</span><span>100%</span></div><div class="bar-track"><div class="bar-fill" style="--w:100%"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee">
+    <div class="mtrack">
+      <div class="mitem">eBay Dropshipping<span class="sep">◆</span></div>
+      <div class="mitem">Product Research<span class="sep">◆</span></div>
+      <div class="mitem">AI Automation<span class="sep">◆</span></div>
+      <div class="mitem">Store Management<span class="sep">◆</span></div>
+      <div class="mitem">Amazon FBA<span class="sep">◆</span></div>
+      <div class="mitem">Shopify<span class="sep">◆</span></div>
+      <div class="mitem">TikTok Shop<span class="sep">◆</span></div>
+      <div class="mitem">Listing Optimization<span class="sep">◆</span></div>
+      <div class="mitem">eBay Dropshipping<span class="sep">◆</span></div>
+      <div class="mitem">Product Research<span class="sep">◆</span></div>
+      <div class="mitem">AI Automation<span class="sep">◆</span></div>
+      <div class="mitem">Store Management<span class="sep">◆</span></div>
+      <div class="mitem">Amazon FBA<span class="sep">◆</span></div>
+      <div class="mitem">Shopify<span class="sep">◆</span></div>
+      <div class="mitem">TikTok Shop<span class="sep">◆</span></div>
+      <div class="mitem">Listing Optimization<span class="sep">◆</span></div>
+    </div>
+  </div>
+
+  <div class="home-stats">
+    <div class="stats-row">
+      <div class="sbox"><div class="snum" data-count="100">0</div><div class="slabel">Products Listed</div></div>
+      <div class="sbox"><div class="snum">UK/US</div><div class="slabel">Markets Covered</div></div>
+      <div class="sbox"><div class="snum">24/7</div><div class="slabel">AI Operations</div></div>
+      <div class="sbox"><div class="snum" data-count="100">0</div><div class="slabel">% Satisfaction</div></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-logo">VELORIX<span>.</span></div>
+    <div class="foot-links">
+      <a onclick="showPage('home')">Home</a>
+      <a onclick="showPage('services')">Services</a>
+      <a onclick="showPage('about')">About</a>
+      <a onclick="showPage('contact')">Contact</a>
+    </div>
+    <div class="foot-right">© 2025 VELORIX SOLUTIONS · ALL SYSTEMS OPERATIONAL</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════ SERVICES PAGE ═══════════════════ -->
+<div class="page" id="page-services">
+  <div class="page-hero">
+    <div class="page-hero-tag">OPERATIONAL MODULES</div>
+    <h1 class="page-title">Our <span class="neon-t">Services</span></h1>
+    <p class="page-sub">Comprehensive eCommerce solutions powered by AI automation. From product research to full store management.</p>
+  </div>
+
+  <div class="svc-section">
+    <div class="svc-big-grid">
+      <div class="svc-card">
+        <div class="sc-num">01</div>
+        <div class="sc-icon">🔍</div>
+        <div class="sc-title">Product Research</div>
+        <div class="sc-desc">AI-powered winning product detection. We scan thousands of listings to find high-demand, low-competition products before anyone else.</div>
+        <div class="sc-features">
+          <div class="sc-feat">Terapeak & ZIK Analytics</div>
+          <div class="sc-feat">Competitor Analysis</div>
+          <div class="sc-feat">Profit Margin Calculation</div>
+          <div class="sc-feat">Trend Detection</div>
+        </div>
+        <div class="sc-price"><div class="sc-from">STARTING FROM</div><div class="sc-amount">$25</div></div>
+        <button class="order-now-btn" onclick="openOrderModal('Product Research','Starter')">ORDER NOW →</button>
+      </div>
+      <div class="svc-card">
+        <div class="sc-num">02</div>
+        <div class="sc-icon">🏪</div>
+        <div class="sc-title">Store Management</div>
+        <div class="sc-desc">Complete A-Z eBay store operations. Listings, orders, inventory, customer support — fully managed with precision and speed.</div>
+        <div class="sc-features">
+          <div class="sc-feat">Order Processing</div>
+          <div class="sc-feat">Inventory Management</div>
+          <div class="sc-feat">Customer Support</div>
+          <div class="sc-feat">Performance Reporting</div>
+        </div>
+        <div class="sc-price"><div class="sc-from">STARTING FROM</div><div class="sc-amount">$50</div></div>
+        <button class="order-now-btn" onclick="openOrderModal('Store Management','Growth')">ORDER NOW →</button>
+      </div>
+      <div class="svc-card">
+        <div class="sc-num">03</div>
+        <div class="sc-icon">🤖</div>
+        <div class="sc-title">AI Automation</div>
+        <div class="sc-desc">Custom AI agents that automate your entire eBay pipeline. Your store runs 24/7 on autopilot — zero manual work needed.</div>
+        <div class="sc-features">
+          <div class="sc-feat">Auto Product Listing</div>
+          <div class="sc-feat">Price Monitoring</div>
+          <div class="sc-feat">Auto Order Tracking</div>
+          <div class="sc-feat">AI Customer Replies</div>
+        </div>
+        <div class="sc-price"><div class="sc-from">STARTING FROM</div><div class="sc-amount">$75</div></div>
+        <button class="order-now-btn" onclick="openOrderModal('AI Automation','Enterprise')">ORDER NOW →</button>
+      </div>
+      <div class="svc-card">
+        <div class="sc-num">04</div>
+        <div class="sc-icon">📦</div>
+        <div class="sc-title">Dropshipping Setup</div>
+        <div class="sc-desc">Complete dropshipping infrastructure from zero. China to USA/UK sourcing, supplier network, and full automation pipeline deployed.</div>
+        <div class="sc-features">
+          <div class="sc-feat">China Supplier Sourcing</div>
+          <div class="sc-feat">UK & USA Markets</div>
+          <div class="sc-feat">Full Store Setup</div>
+          <div class="sc-feat">Automation Pipeline</div>
+        </div>
+        <div class="sc-price"><div class="sc-from">STARTING FROM</div><div class="sc-amount">$100</div></div>
+        <button class="order-now-btn" onclick="openOrderModal('Dropshipping Setup','Growth')">ORDER NOW →</button>
+      </div>
+      <div class="svc-card">
+        <div class="sc-num">05</div>
+        <div class="sc-icon">📊</div>
+        <div class="sc-title">Listing Optimization</div>
+        <div class="sc-desc">SEO-engineered titles, descriptions, and imagery. Our listings rank higher, convert better, and dominate eBay search results.</div>
+        <div class="sc-features">
+          <div class="sc-feat">SEO Title Writing</div>
+          <div class="sc-feat">Description Copywriting</div>
+          <div class="sc-feat">Keyword Research</div>
+          <div class="sc-feat">Category Optimization</div>
+        </div>
+        <div class="sc-price"><div class="sc-from">STARTING FROM</div><div class="sc-amount">$30</div></div>
+        <button class="order-now-btn" onclick="openOrderModal('Listing Optimization','Starter')">ORDER NOW →</button>
+      </div>
+      <div class="svc-card">
+        <div class="sc-num">06</div>
+        <div class="sc-icon">⚡</div>
+        <div class="sc-title">Brand Ungating</div>
+        <div class="sc-desc">Get access to restricted brands and premium categories. Expand your product catalog and unlock new revenue streams immediately.</div>
+        <div class="sc-features">
+          <div class="sc-feat">Brand Approval</div>
+          <div class="sc-feat">Category Access</div>
+          <div class="sc-feat">Documentation Help</div>
+          <div class="sc-feat">Account Safety</div>
+        </div>
+        <div class="sc-price"><div class="sc-from">STARTING FROM</div><div class="sc-amount">$40</div></div>
+        <button class="order-now-btn" onclick="openOrderModal('Brand Ungating','Starter')">ORDER NOW →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="pricing-section">
+    <div class="sec-wrap" style="padding:0">
+      <div class="sec-tag">PRICING PLANS</div>
+      <h2 class="sec-h">Choose Your <span class="neon-t">Package</span></h2>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="pc-name">STARTER</div>
+        <div class="pc-price"><sup>$</sup>25</div>
+        <div class="pc-period">PER PROJECT</div>
+        <div class="pc-features">
+          <div class="pc-feat">50 Product Listings</div>
+          <div class="pc-feat">Basic SEO Optimization</div>
+          <div class="pc-feat">5 Day Delivery</div>
+          <div class="pc-feat">1 Revision</div>
+        </div>
+        <button class="btn-p" onclick="showPage('contact')" style="width:100%;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)">Get Started</button>
+      </div>
+      <div class="price-card featured">
+        <div class="pc-name">GROWTH</div>
+        <div class="pc-price"><sup>$</sup>75</div>
+        <div class="pc-period">PER MONTH</div>
+        <div class="pc-features">
+          <div class="pc-feat">200 Products + Management</div>
+          <div class="pc-feat">Full SEO Optimization</div>
+          <div class="pc-feat">Order Management</div>
+          <div class="pc-feat">Weekly Reports</div>
+          <div class="pc-feat">Priority Support</div>
+        </div>
+        <button class="btn-p" onclick="showPage('contact')" style="width:100%;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)">Get Started</button>
+      </div>
+      <div class="price-card">
+        <div class="pc-name">ENTERPRISE</div>
+        <div class="pc-price"><sup>$</sup>150</div>
+        <div class="pc-period">PER MONTH</div>
+        <div class="pc-features">
+          <div class="pc-feat">Unlimited Products</div>
+          <div class="pc-feat">AI Automation System</div>
+          <div class="pc-feat">Full Store Management</div>
+          <div class="pc-feat">Customer Support</div>
+          <div class="pc-feat">Daily Reports</div>
+          <div class="pc-feat">Dedicated Manager</div>
+        </div>
+        <button class="btn-p" onclick="showPage('contact')" style="width:100%;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)">Get Started</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-logo">VELORIX<span>.</span></div>
+    <div class="foot-links">
+      <a onclick="showPage('home')">Home</a>
+      <a onclick="showPage('services')">Services</a>
+      <a onclick="showPage('about')">About</a>
+      <a onclick="showPage('contact')">Contact</a>
+    </div>
+    <div class="foot-right">© 2025 VELORIX SOLUTIONS · ALL SYSTEMS OPERATIONAL</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════ ABOUT PAGE ═══════════════════ -->
+<div class="page" id="page-about">
+  <div class="about-hero">
+    <div class="founder-visual">
+      <div class="founder-frame">
+        <div class="founder-glow"></div>
+        <div class="founder-img-wrap">
+          <div class="corner-d f tl"></div><div class="corner-d f tr"></div>
+          <div class="corner-d f bl"></div><div class="corner-d f br"></div>
+          <div class="scan-line"></div>
+          <div class="founder-img-placeholder">
+            <div class="founder-placeholder-icon">👤</div>
+            <div class="founder-placeholder-text">Founder Photo</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,255,231,.3);letter-spacing:2px;">[UPLOAD YOUR PHOTO]</div>
+          </div>
+        </div>
+        <div class="founder-badge">
+          <div class="fb-title">// FOUNDER & CEO</div>
+          <div class="fb-name">Muzamil</div>
+          <div class="fb-role">eBay Expert · AI Automation Engineer</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-content">
+      <div class="page-hero-tag">ABOUT THE FOUNDER</div>
+      <h1 class="about-title">The Mind Behind <span class="neon-t">Velorix</span></h1>
+      <p class="about-bio">I'm Muzamil — founder of Velorix Solutions. With 1+ year of hands-on eBay dropshipping experience in UK and USA markets, I've built and scaled stores from scratch using real data and AI-powered systems.</p>
+      <p class="about-bio">My mission is simple: help eBay sellers grow faster using the power of AI automation. While others do it manually, we do it smarter.</p>
+      <div class="about-skills">
+        <div class="skill-item"><div class="sk-name">eBay Dropshipping</div><div class="sk-bar"><div class="sk-fill" style="--w:96%"></div></div></div>
+        <div class="skill-item"><div class="sk-name">Product Research</div><div class="sk-bar"><div class="sk-fill" style="--w:98%"></div></div></div>
+        <div class="skill-item"><div class="sk-name">AI Automation</div><div class="sk-bar"><div class="sk-fill" style="--w:88%"></div></div></div>
+        <div class="skill-item"><div class="sk-name">Store Management</div><div class="sk-bar"><div class="sk-fill" style="--w:95%"></div></div></div>
+        <div class="skill-item"><div class="sk-name">Python & Coding</div><div class="sk-bar"><div class="sk-fill" style="--w:80%"></div></div></div>
+        <div class="skill-item"><div class="sk-name">Client Relations</div><div class="sk-bar"><div class="sk-fill" style="--w:92%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <div class="about-story">
+    <div class="sec-tag">THE JOURNEY</div>
+    <h2 class="sec-h">Our <span class="neon-t">Story</span></h2>
+    <div class="story-grid">
+      <div class="story-card">
+        <div class="st-year">2024</div>
+        <div class="st-title">The Beginning</div>
+        <div class="st-text">Started with zero experience in eBay dropshipping. Learned everything from scratch — product research, listing, store management. Built first profitable store targeting UK market.</div>
+      </div>
+      <div class="story-card right">
+        <div class="st-year">2024</div>
+        <div class="st-title">Expanding Markets</div>
+        <div class="st-text">Expanded to USA market. Discovered the power of China-to-USA sourcing. Developed systems for finding winning products consistently. Listed 100+ products across multiple niches.</div>
+      </div>
+      <div class="story-card">
+        <div class="st-year">2025</div>
+        <div class="st-title">AI Integration</div>
+        <div class="st-text">Started learning Python and AI automation. Built custom AI agents for product research and listing generation. This became the biggest competitive advantage — doing in minutes what takes others hours.</div>
+      </div>
+      <div class="story-card right">
+        <div class="st-year">2025</div>
+        <div class="st-title">Velorix Solutions</div>
+        <div class="st-text">Launched Velorix Solutions to help other eBay sellers scale with AI. The vision: build an agency that combines real eCommerce experience with cutting-edge automation technology.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALUES -->
+  <div class="values-section">
+    <div class="sec-tag">CORE VALUES</div>
+    <h2 class="sec-h">What We <span class="neon-t">Stand For</span></h2>
+    <div class="values-grid">
+      <div class="val-card">
+        <div class="val-icon">🎯</div>
+        <div class="val-title">Results First</div>
+        <div class="val-text">We measure success by your growth, not our effort. Every decision is driven by data and real outcomes.</div>
+      </div>
+      <div class="val-card">
+        <div class="val-icon">🤖</div>
+        <div class="val-title">AI-Powered</div>
+        <div class="val-text">We use the latest AI tools to work smarter and faster. Technology is our biggest advantage over traditional VAs.</div>
+      </div>
+      <div class="val-card">
+        <div class="val-icon">🔒</div>
+        <div class="val-title">Transparency</div>
+        <div class="val-text">No hidden fees, no surprises. We keep you informed with regular reports and open communication at all times.</div>
+      </div>
+      <div class="val-card">
+        <div class="val-icon">🚀</div>
+        <div class="val-title">Scale Mindset</div>
+        <div class="val-text">We don't just manage — we grow. Our goal is to make your store bigger, better, and more profitable every month.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-logo">VELORIX<span>.</span></div>
+    <div class="foot-links">
+      <a onclick="showPage('home')">Home</a>
+      <a onclick="showPage('services')">Services</a>
+      <a onclick="showPage('about')">About</a>
+      <a onclick="showPage('contact')">Contact</a>
+    </div>
+    <div class="foot-right">© 2025 VELORIX SOLUTIONS · ALL SYSTEMS OPERATIONAL</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════ CONTACT PAGE ═══════════════════ -->
+<div class="page" id="page-contact">
+  <div class="page-hero">
+    <div class="page-hero-tag">INITIALIZE CONTACT</div>
+    <h1 class="page-title">Get In <span class="neon-t">Touch</span></h1>
+    <p class="page-sub">Ready to scale your eBay store? Send us a message and we'll get back to you within 24 hours.</p>
+  </div>
+
+  <div class="contact-section">
+    <div class="contact-info">
+      <div class="contact-items">
+        <div class="citem">
+          <div class="ci-icon">📧</div>
+          <div><div class="ci-label">Email</div><div class="ci-val">velorixsolutions@gmail.com</div></div>
+        </div>
+        <div class="citem">
+          <div class="ci-icon">💼</div>
+          <div><div class="ci-label">Fiverr</div><div class="ci-val">Search "Velorix Solutions"</div></div>
+        </div>
+        <div class="citem">
+          <div class="ci-icon">🌍</div>
+          <div><div class="ci-label">Markets</div><div class="ci-val">UK & USA eBay Markets</div></div>
+        </div>
+        <div class="citem">
+          <div class="ci-icon">⏰</div>
+          <div><div class="ci-label">Response Time</div><div class="ci-val">Within 24 Hours</div></div>
+        </div>
+        <div class="citem">
+          <div class="ci-icon">🤝</div>
+          <div><div class="ci-label">Free Consultation</div><div class="ci-val">First Session Always Free</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <div class="corner-d tl"></div><div class="corner-d tr"></div>
+      <div class="corner-d bl"></div><div class="corner-d br"></div>
+      <div class="cf-title">// SEND MESSAGE</div>
+      <div class="form-group">
+        <label class="form-label">Your Name</label>
+        <input type="text" class="form-input" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Service Required</label>
+        <select class="form-input" style="cursor:pointer;">
+          <option value="" style="background:#020d14">Select a service...</option>
+          <option style="background:#020d14">Product Research</option>
+          <option style="background:#020d14">Store Management</option>
+          <option style="background:#020d14">AI Automation</option>
+          <option style="background:#020d14">Dropshipping Setup</option>
+          <option style="background:#020d14">Listing Optimization</option>
+          <option style="background:#020d14">Full Package</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-input" placeholder="Tell us about your eBay store and goals..."></textarea>
+      </div>
+      <button class="form-btn" onclick="handleFormSubmit()">SEND MESSAGE →</button>
+    </div>
+  </div>
+
+  <div class="social-section">
+    <span class="social-label">Connect:</span>
+    <a href="mailto:velorixsolutions@gmail.com" class="social-btn">📧 Email</a>
+    <a href="#" class="social-btn">💼 Fiverr</a>
+    <a href="#" class="social-btn">💬 WhatsApp</a>
+    <a href="#" class="social-btn">📱 Instagram</a>
+  </div>
+
+  <footer>
+    <div class="foot-logo">VELORIX<span>.</span></div>
+    <div class="foot-links">
+      <a onclick="showPage('home')">Home</a>
+      <a onclick="showPage('services')">Services</a>
+      <a onclick="showPage('about')">About</a>
+      <a onclick="showPage('contact')">Contact</a>
+    </div>
+    <div class="foot-right">© 2025 VELORIX SOLUTIONS · ALL SYSTEMS OPERATIONAL</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════ ORDER PAGE ═══════════════════ -->
+<div class="page" id="page-order">
+  <div class="page-hero">
+    <div class="page-hero-tag">PLACE YOUR ORDER</div>
+    <h1 class="page-title">Order <span class="neon-t">Services</span></h1>
+    <p class="page-sub">Choose your service and package below. We'll contact you within 1 hour to confirm and begin work.</p>
+  </div>
+
+  <div style="padding:40px 60px;">
+
+    <!-- SERVICE SELECTOR -->
+    <div style="margin-bottom:40px;">
+      <div class="sec-tag" style="opacity:1;transform:none;">SELECT SERVICE</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:20px;" id="serviceSelector">
+        <div class="svc-selector-btn active-svc" onclick="selectService(this,'Product Research')" style="padding:20px 24px;border:1px solid rgba(0,255,231,.2);cursor:pointer;transition:.3s;background:rgba(0,255,231,.04);display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">🔍</span>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#fff;">Product Research</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;">FROM $25</div>
+          </div>
+        </div>
+        <div class="svc-selector-btn" onclick="selectService(this,'Store Management')" style="padding:20px 24px;border:1px solid rgba(0,255,231,.06);cursor:pointer;transition:.3s;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">🏪</span>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#fff;">Store Management</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;">FROM $50</div>
+          </div>
+        </div>
+        <div class="svc-selector-btn" onclick="selectService(this,'AI Automation')" style="padding:20px 24px;border:1px solid rgba(0,255,231,.06);cursor:pointer;transition:.3s;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">🤖</span>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#fff;">AI Automation</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;">FROM $75</div>
+          </div>
+        </div>
+        <div class="svc-selector-btn" onclick="selectService(this,'Dropshipping Setup')" style="padding:20px 24px;border:1px solid rgba(0,255,231,.06);cursor:pointer;transition:.3s;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">📦</span>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#fff;">Dropshipping Setup</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;">FROM $100</div>
+          </div>
+        </div>
+        <div class="svc-selector-btn" onclick="selectService(this,'Listing Optimization')" style="padding:20px 24px;border:1px solid rgba(0,255,231,.06);cursor:pointer;transition:.3s;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">📊</span>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#fff;">Listing Optimization</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;">FROM $30</div>
+          </div>
+        </div>
+        <div class="svc-selector-btn" onclick="selectService(this,'Brand Ungating')" style="padding:20px 24px;border:1px solid rgba(0,255,231,.06);cursor:pointer;transition:.3s;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;">⚡</span>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#fff;">Brand Ungating</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);letter-spacing:1px;">FROM $40</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN ORDER LAYOUT -->
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;">
+
+      <!-- LEFT: PACKAGES + FORM -->
+      <div>
+        <!-- PACKAGES -->
+        <div style="margin-bottom:32px;">
+          <div class="sec-tag" style="opacity:1;transform:none;">SELECT PACKAGE</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:16px;">
+            <div class="pkg-card selected-pkg" onclick="selectPagePkg(this,'Starter',25,'3 Days')" style="padding:28px 20px;border:2px solid var(--neon);background:rgba(0,255,231,.04);cursor:pointer;transition:.3s;text-align:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));">
+              <div style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--neon);letter-spacing:2px;margin-bottom:10px;">STARTER</div>
+              <div style="font-family:'Orbitron',monospace;font-size:40px;font-weight:900;color:#fff;line-height:1;"><sup style="font-size:16px;color:var(--gray);">$</sup>25</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gray);letter-spacing:2px;margin-top:6px;">3 DAY DELIVERY</div>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px;" id="pkg-s-feats">
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>50 Product Listings</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>SEO Optimization</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>1 Revision</div>
+                <div style="font-size:12px;color:rgba(200,255,249,.2);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon2);">✗</span>Store Management</div>
+              </div>
+            </div>
+            <div class="pkg-card" onclick="selectPagePkg(this,'Growth',75,'5 Days')" style="padding:28px 20px;border:2px solid rgba(0,255,231,.1);cursor:pointer;transition:.3s;text-align:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));position:relative;">
+              <div style="position:absolute;top:10px;right:10px;background:var(--gold);color:var(--dark);font-family:'Orbitron',monospace;font-size:8px;font-weight:700;padding:3px 8px;letter-spacing:1px;">POPULAR</div>
+              <div style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--neon);letter-spacing:2px;margin-bottom:10px;">GROWTH</div>
+              <div style="font-family:'Orbitron',monospace;font-size:40px;font-weight:900;color:#fff;line-height:1;"><sup style="font-size:16px;color:var(--gray);">$</sup>75</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gray);letter-spacing:2px;margin-top:6px;">5 DAY DELIVERY</div>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px;">
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>200 Products</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>Store Management</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>Weekly Reports</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>Priority Support</div>
+              </div>
+            </div>
+            <div class="pkg-card" onclick="selectPagePkg(this,'Enterprise',150,'7 Days')" style="padding:28px 20px;border:2px solid rgba(0,255,231,.1);cursor:pointer;transition:.3s;text-align:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));">
+              <div style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--neon);letter-spacing:2px;margin-bottom:10px;">ENTERPRISE</div>
+              <div style="font-family:'Orbitron',monospace;font-size:40px;font-weight:900;color:#fff;line-height:1;"><sup style="font-size:16px;color:var(--gray);">$</sup>150</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gray);letter-spacing:2px;margin-top:6px;">7 DAY DELIVERY</div>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px;">
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>Unlimited Products</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>AI Automation</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>Full Store Mgmt</div>
+                <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;"><span style="color:var(--neon);">✓</span>Dedicated Manager</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDER FORM -->
+        <div style="background:var(--dark2);border:1px solid var(--border);padding:36px;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));position:relative;">
+          <div class="corner-d tl"></div><div class="corner-d tr"></div>
+          <div class="corner-d bl"></div><div class="corner-d br"></div>
+          <div class="sec-tag" style="opacity:1;transform:none;margin-bottom:24px;">YOUR DETAILS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div>
+              <label class="form-label">Full Name *</label>
+              <input type="text" class="form-input" id="pg-name" placeholder="Enter your name">
+            </div>
+            <div>
+              <label class="form-label">Email Address *</label>
+              <input type="email" class="form-input" id="pg-email" placeholder="your@email.com">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div>
+              <label class="form-label">WhatsApp Number</label>
+              <input type="text" class="form-input" id="pg-phone" placeholder="+1 234 567 890">
+            </div>
+            <div>
+              <label class="form-label">eBay Store URL</label>
+              <input type="text" class="form-input" id="pg-store" placeholder="ebay.com/usr/yourstore">
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label class="form-label">Your Niche / Products</label>
+            <input type="text" class="form-input" id="pg-niche" placeholder="e.g. Car accessories, Electronics, Home decor...">
+          </div>
+          <div>
+            <label class="form-label">Special Requirements</label>
+            <textarea class="form-input" id="pg-notes" placeholder="Tell us anything specific about your store, goals, or requirements..." style="min-height:100px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ORDER SUMMARY -->
+      <div style="position:sticky;top:90px;">
+        <div style="background:var(--dark2);border:1px solid var(--border);padding:28px;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));">
+          <div class="sec-tag" style="opacity:1;transform:none;margin-bottom:20px;">ORDER SUMMARY</div>
+
+          <!-- Selected Service -->
+          <div style="padding:16px;background:rgba(0,255,231,.03);border:1px solid rgba(0,255,231,.08);margin-bottom:16px;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gray);margin-bottom:6px;">SERVICE</div>
+            <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:#fff;" id="sum-service">Product Research</div>
+          </div>
+
+          <!-- Package Details -->
+          <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(0,255,231,.08);margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:11px;">
+              <span style="color:var(--gray);">Package</span>
+              <span style="color:#fff;" id="sum-pkg">Starter</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:11px;">
+              <span style="color:var(--gray);">Delivery Time</span>
+              <span style="color:var(--neon);" id="sum-delivery">3 Days</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:11px;">
+              <span style="color:var(--gray);">Revisions</span>
+              <span style="color:#fff;">Unlimited</span>
+            </div>
+          </div>
+
+          <!-- What's included -->
+          <div style="margin-bottom:20px;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gray);margin-bottom:10px;">INCLUDED</div>
+            <div style="display:flex;flex-direction:column;gap:6px;" id="sum-features">
+              <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:8px;"><span style="color:var(--neon);font-weight:700;">✓</span>50 Product Listings</div>
+              <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:8px;"><span style="color:var(--neon);font-weight:700;">✓</span>SEO Optimization</div>
+              <div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:8px;"><span style="color:var(--neon);font-weight:700;">✓</span>1 Revision</div>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div style="background:rgba(0,255,231,.04);border:1px solid rgba(0,255,231,.15);padding:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gray);">TOTAL</span>
+            <span style="font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:var(--neon);" id="sum-price">$25</span>
+          </div>
+
+          <!-- Order Button -->
+          <button class="order-btn" id="mainOrderBtn" onclick="submitPageOrder()">PLACE ORDER →</button>
+
+          <!-- Trust Badges -->
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,231,.4);">
+              <span>⚡</span> Response within 1 hour
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,231,.4);">
+              <span>🔒</span> 100% Satisfaction Guaranteed
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,231,.4);">
+              <span>🔄</span> Free Revisions Included
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,231,.4);">
+              <span>💬</span> Direct Communication
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div id="pageSuccess" style="display:none;text-align:center;padding:80px 40px;background:var(--dark2);border:1px solid var(--border);margin-top:24px;clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));">
+      <div style="font-size:70px;margin-bottom:24px;animation:bounce .6s ease;">✅</div>
+      <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--neon);margin-bottom:16px;">Order Placed Successfully!</div>
+      <p style="color:var(--gray);font-size:16px;line-height:1.7;max-width:500px;margin:0 auto 20px;">Thank you for choosing Velorix Solutions! We will contact you within <strong style="color:var(--neon)">1 hour</strong> to confirm your order and get started immediately.</p>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--neon);background:rgba(0,255,231,.05);border:1px solid rgba(0,255,231,.2);padding:12px 28px;display:inline-block;letter-spacing:3px;margin-bottom:24px;" id="pageOrderId">ORDER #VLX-000000</div>
+      <br>
+      <p style="color:var(--gray);font-size:13px;margin-bottom:28px;">Questions? Email us: <span style="color:var(--neon)">velorixsolutions@gmail.com</span></p>
+      <button class="btn-p" onclick="resetOrder()">PLACE ANOTHER ORDER</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-logo">VELORIX<span>.</span></div>
+    <div class="foot-links">
+      <a onclick="showPage('home')">Home</a>
+      <a onclick="showPage('services')">Services</a>
+      <a onclick="showPage('about')">About</a>
+      <a onclick="showPage('contact')">Contact</a>
+      <a onclick="showPage('order')">Order</a>
+    </div>
+    <div class="foot-right">© 2025 VELORIX SOLUTIONS · ALL SYSTEMS OPERATIONAL</div>
+  </footer>
+</div>
+
+<!-- ORDER PAGE JS -->
+<script>
+let pagePkg={name:'Starter',price:25,delivery:'3 Days'};
+let pageService='Product Research';
+
+const pkgData={
+  Starter:{price:25,delivery:'3 Days',features:['50 Product Listings','SEO Optimization','1 Revision','3 Day Delivery']},
+  Growth:{price:75,delivery:'5 Days',features:['200 Products + Management','Full SEO Optimization','Order Management','Weekly Reports','Priority Support']},
+  Enterprise:{price:150,delivery:'7 Days',features:['Unlimited Products','AI Automation System','Full Store Management','Customer Support','Daily Reports','Dedicated Manager']}
+};
+
+function selectService(el,name){
+  document.querySelectorAll('.svc-selector-btn').forEach(b=>{
+    b.style.borderColor='rgba(0,255,231,.06)';
+    b.style.background='transparent';
+  });
+  el.style.borderColor='rgba(0,255,231,.4)';
+  el.style.background='rgba(0,255,231,.04)';
+  pageService=name;
+  document.getElementById('sum-service').textContent=name;
+}
+
+function selectPagePkg(el,name,price,delivery){
+  document.querySelectorAll('.pkg-card').forEach(p=>{
+    p.style.borderColor='rgba(0,255,231,.1)';
+    p.style.background='transparent';
+  });
+  el.style.borderColor='var(--neon)';
+  el.style.background='rgba(0,255,231,.04)';
+  pagePkg={name,price,delivery};
+  document.getElementById('sum-pkg').textContent=name;
+  document.getElementById('sum-delivery').textContent=delivery;
+  document.getElementById('sum-price').textContent='$'+price;
+  const feats=pkgData[name].features;
+  document.getElementById('sum-features').innerHTML=feats.map(f=>`<div style="font-size:12px;color:var(--gray);display:flex;align-items:center;gap:8px;"><span style="color:var(--neon);font-weight:700;">✓</span>${f}</div>`).join('');
+}
+
+function submitPageOrder(){
+  const name=document.getElementById('pg-name').value.trim();
+  const email=document.getElementById('pg-email').value.trim();
+  if(!name||!email){
+    // Shake effect
+    const btn=document.getElementById('mainOrderBtn');
+    btn.style.transform='translateX(-5px)';
+    setTimeout(()=>btn.style.transform='translateX(5px)',100);
+    setTimeout(()=>btn.style.transform='translateX(0)',200);
+    alert('⚠️ Please enter your Name and Email!');
+    return;
+  }
+  const btn=document.getElementById('mainOrderBtn');
+  btn.textContent='PROCESSING...';
+  btn.style.opacity='.7';
+  btn.disabled=true;
+  setTimeout(()=>{
+    const id='VLX-'+Math.floor(100000+Math.random()*900000);
+    document.getElementById('pageOrderId').textContent='ORDER #'+id;
+    document.querySelector('#page-order > div:nth-child(2)').style.display='none';
+    document.getElementById('pageSuccess').style.display='block';
+    document.getElementById('pageSuccess').scrollIntoView({behavior:'smooth'});
+    btn.textContent='PLACE ORDER →';
+    btn.style.opacity='1';
+    btn.disabled=false;
+  },2000);
+}
+
+function resetOrder(){
+  document.querySelector('#page-order > div:nth-child(2)').style.display='block';
+  document.getElementById('pageSuccess').style.display='none';
+  document.getElementById('pg-name').value='';
+  document.getElementById('pg-email').value='';
+  document.getElementById('pg-phone').value='';
+  document.getElementById('pg-store').value='';
+  document.getElementById('pg-niche').value='';
+  document.getElementById('pg-notes').value='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalServiceTitle">// PLACE ORDER</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalMainBody">
+      <!-- STEP 1: Choose Package -->
+      <div id="step1">
+        <div class="order-section-title">Choose Your Package</div>
+        <div class="order-pkgs" id="orderPkgs">
+          <div class="order-pkg selected" onclick="selectPkg(this,'Starter',25,'3 Days')">
+            <div class="pkg-name">STARTER</div>
+            <div class="pkg-price"><sup>$</sup>25</div>
+            <div class="pkg-desc">BASIC · 3 DAYS</div>
+          </div>
+          <div class="order-pkg" onclick="selectPkg(this,'Growth',75,'5 Days')">
+            <div class="pkg-name">GROWTH</div>
+            <div class="pkg-price"><sup>$</sup>75</div>
+            <div class="pkg-desc">STANDARD · 5 DAYS</div>
+          </div>
+          <div class="order-pkg" onclick="selectPkg(this,'Enterprise',150,'7 Days')">
+            <div class="pkg-name">ENTERPRISE</div>
+            <div class="pkg-price"><sup>$</sup>150</div>
+            <div class="pkg-desc">PREMIUM · 7 DAYS</div>
+          </div>
+        </div>
+
+        <div class="order-section-title">What's Included</div>
+        <div class="order-features" id="featuresList">
+          <div class="order-feat included">50 Product Listings</div>
+          <div class="order-feat included">SEO Optimization</div>
+          <div class="order-feat included">3 Day Delivery</div>
+          <div class="order-feat excluded">Store Management</div>
+          <div class="order-feat excluded">AI Automation</div>
+          <div class="order-feat excluded">Weekly Reports</div>
+        </div>
+
+        <div class="order-section-title">Your Details</div>
+        <div class="order-form-grid">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-input" id="orderName" placeholder="Full name">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="orderEmail" placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:14px">
+          <label class="form-label">eBay Store Link (Optional)</label>
+          <input type="text" class="form-input" id="orderStore" placeholder="https://ebay.com/usr/yourstore">
+        </div>
+        <div class="form-group" style="margin-top:14px">
+          <label class="form-label">Special Requirements</label>
+          <textarea class="form-input" id="orderNotes" placeholder="Tell us about your store, niche, or any specific requirements..." style="min-height:90px;"></textarea>
+        </div>
+
+        <div class="order-summary">
+          <div class="os-row"><span>Service</span><span id="os-service">—</span></div>
+          <div class="os-row"><span>Package</span><span id="os-pkg">Starter</span></div>
+          <div class="os-row"><span>Delivery</span><span id="os-delivery">3 Days</span></div>
+          <div class="os-total"><span>Total</span><span id="os-total">$25</span></div>
+        </div>
+
+        <button class="order-btn" onclick="placeOrder()">PLACE ORDER →</button>
+        <p class="order-note">⚡ You'll receive a confirmation email within 1 hour · 100% Satisfaction Guaranteed</p>
+      </div>
+
+      <!-- SUCCESS SCREEN -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Order Placed!</div>
+        <p class="success-text">Thank you for choosing Velorix Solutions!<br>We'll contact you within <strong style="color:var(--neon)">1 hour</strong> to confirm your order and get started.</p>
+        <div class="success-order-id" id="orderId">ORDER #VLX-000000</div>
+        <p class="success-text" style="font-size:13px;">Check your email for order confirmation.<br>Questions? Email us: <span style="color:var(--neon)">velorixsolutions@gmail.com</span></p>
+        <button class="order-btn" onclick="closeModal()">BACK TO WEBSITE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ PAGE ROUTING ═══════════════
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    a.classList.remove('active');
+    if(a.dataset.page===name) a.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(()=>initAnimations(),100);
+}
+
+// ═══════════════ CURSOR ═══════════════
+const cur=document.getElementById('cursor');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+document.addEventListener('mousedown',()=>cur.classList.add('click'));
+document.addEventListener('mouseup',()=>cur.classList.remove('click'));
+(function anim(){
+  cx+=(mx-cx)*.15;cy+=(my-cy)*.15;
+  cur.style.left=(cx-12)+'px';
+  cur.style.top=(cy-12)+'px';
+  requestAnimationFrame(anim);
+})();
+document.querySelectorAll('a,button,.svc-card,.mbox,.citem,.price-card,.val-card,.skill-item,.story-card,.order-pkg').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('hover'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('hover'));
+});
+
+// ═══════════════ CANVAS ═══════════════
+const cv=document.getElementById('bgCanvas');
+const ctx=cv.getContext('2d');
+function resizeCanvas(){cv.width=window.innerWidth;cv.height=window.innerHeight;}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+const pts=[];
+for(let i=0;i<110;i++) pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,sz:Math.random()*1.4+.4,op:Math.random()*.4+.1,c:Math.random()>.7?'0,255,231':Math.random()>.5?'123,0,255':'255,0,110'});
+function drawGrid(){ctx.strokeStyle='rgba(0,255,231,0.018)';ctx.lineWidth=1;for(let x=0;x<cv.width;x+=80){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}for(let y=0;y<cv.height;y+=80){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}}
+(function animCV(){ctx.clearRect(0,0,cv.width,cv.height);drawGrid();pts.forEach((p,i)=>{pts.forEach((q,j)=>{if(j>i){const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<110){ctx.strokeStyle=`rgba(0,255,231,${(1-d/110)*.1})`;ctx.lineWidth=.4;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();}}});p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;ctx.fillStyle=`rgba(${p.c},${p.op})`;ctx.shadowBlur=5;ctx.shadowColor=`rgba(${p.c},.7)`;ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;});requestAnimationFrame(animCV);})();
+
+// ═══════════════ STATUS TIME ═══════════════
+function tick(){document.getElementById('sTime').textContent=new Date().toTimeString().split(' ')[0];}
+setInterval(tick,1000);tick();
+
+// ═══════════════ SCROLL ANIMATIONS ═══════════════
+function initAnimations(){
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const d=e.target.dataset.delay||0;
+        setTimeout(()=>e.target.classList.add('vis'),+d);
+      }
+    });
+  },{threshold:.1});
+  document.querySelectorAll('#page-'+getCurrentPage()+' .sbox, #page-'+getCurrentPage()+' .svc-card, #page-'+getCurrentPage()+' .price-card, #page-'+getCurrentPage()+' .val-card, #page-'+getCurrentPage()+' .story-card, #page-'+getCurrentPage()+' .citem, #page-'+getCurrentPage()+' .sec-tag, #page-'+getCurrentPage()+' .sec-h').forEach((el,i)=>{
+    el.dataset.delay=i*80;io.observe(el);
+  });
+  // BARS
+  document.querySelectorAll('#page-'+getCurrentPage()+' .bar-fill, #page-'+getCurrentPage()+' .sk-fill').forEach(b=>{
+    setTimeout(()=>b.classList.add('go'),600);
+  });
+  // COUNTERS
+  document.querySelectorAll('#page-'+getCurrentPage()+' [data-count]').forEach(el=>{
+    if(el.dataset.counted) return;
+    el.dataset.counted='1';
+    const t=parseInt(el.dataset.count);
+    let c=0;const s=t/70;
+    const tm=setInterval(()=>{c+=s;if(c>=t){el.textContent=t+'+';clearInterval(tm);}else el.textContent=Math.floor(c)+'+';},20);
+  });
+}
+function getCurrentPage(){
+  const a=document.querySelector('.page.active');
+  return a?a.id.replace('page-',''):'home';
+}
+setTimeout(initAnimations,300);
+
+// ═══════════════ FORM ═══════════════
+function handleFormSubmit(){
+  const btn=document.querySelector('.form-btn');
+  btn.textContent='SENDING...';
+  btn.style.background='rgba(0,255,231,.5)';
+  setTimeout(()=>{
+    btn.textContent='MESSAGE SENT ✓';
+    btn.style.background='rgba(0,255,231,.8)';
+    setTimeout(()=>{btn.textContent='SEND MESSAGE →';btn.style.background='var(--neon)';},3000);
+  },1500);
+}
+
+// ═══════════════ MOBILE MENU ═══════════════
+function toggleMobileMenu(){
+  const links=document.querySelector('.nav-links');
+  if(links.style.display==='flex'){
+    links.style.display='none';
+  } else {
+    links.style.display='flex';
+    links.style.flexDirection='column';
+    links.style.position='absolute';
+    links.style.top='60px';
+    links.style.left='0';
+    links.style.right='0';
+    links.style.background='rgba(0,5,9,0.98)';
+    links.style.padding='20px';
+    links.style.borderBottom='1px solid rgba(0,255,231,.1)';
+  }
+}// ═══════════════ ORDER MODAL ═══════════════
+const packages = {
+  Starter:    { price:25,  delivery:'3 Days', features:['50 Product Listings','SEO Optimization','3 Day Delivery','-Store Management','-AI Automation','-Weekly Reports']},
+  Growth:     { price:75,  delivery:'5 Days', features:['200 Products + Management','Full SEO Optimization','Order Management','Weekly Reports','Priority Support','-AI Automation']},
+  Enterprise: { price:150, delivery:'7 Days', features:['Unlimited Products','AI Automation System','Full Store Management','Customer Support','Daily Reports','Dedicated Manager']}
+};
+
+let currentService='eBay Service';
+let currentPkg='Starter';
+
+function openOrderModal(service, defaultPkg='Starter'){
+  currentService=service;
+  currentPkg=defaultPkg;
+  document.getElementById('modalServiceTitle').textContent='// ORDER: '+service.toUpperCase();
+  document.getElementById('os-service').textContent=service;
+  document.getElementById('successScreen').classList.remove('show');
+  document.getElementById('step1').style.display='block';
+  // reset packages
+  document.querySelectorAll('.order-pkg').forEach((p,i)=>{
+    p.classList.remove('selected');
+    if(['Starter','Growth','Enterprise'][i]===defaultPkg) p.classList.add('selected');
+  });
+  updatePkgInfo(defaultPkg);
+  document.getElementById('orderModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('orderModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function selectPkg(el, name, price, delivery){
+  document.querySelectorAll('.order-pkg').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+  currentPkg=name;
+  updatePkgInfo(name);
+}
+
+function updatePkgInfo(name){
+  const pkg=packages[name];
+  document.getElementById('os-pkg').textContent=name;
+  document.getElementById('os-delivery').textContent=pkg.delivery;
+  document.getElementById('os-total').textContent='$'+pkg.price;
+  const fl=document.getElementById('featuresList');
+  fl.innerHTML=pkg.features.map(f=>{
+    const excl=f.startsWith('-');
+    const text=excl?f.slice(1):f;
+    return `<div class="order-feat ${excl?'excluded':'included'}">${text}</div>`;
+  }).join('');
+}
+
+function placeOrder(){
+  const name=document.getElementById('orderName').value.trim();
+  const email=document.getElementById('orderEmail').value.trim();
+  if(!name||!email){
+    alert('Please enter your name and email!');return;
+  }
+  const btn=document.querySelector('.order-btn');
+  btn.textContent='PROCESSING...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    const orderId='VLX-'+Math.floor(100000+Math.random()*900000);
+    document.getElementById('orderId').textContent='ORDER #'+orderId;
+    document.getElementById('step1').style.display='none';
+    document.getElementById('successScreen').classList.add('show');
+    btn.textContent='PLACE ORDER →';
+    btn.disabled=false;
+  },1800);
+}
+
+// Close on overlay click
+document.getElementById('orderModal').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+// ESC key close
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
+</script>
+</body>
+</html>
