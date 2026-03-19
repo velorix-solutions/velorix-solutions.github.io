@@ -1,375 +1,623 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Velorix — AI Automation & eCommerce</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    :root {
-      --black: #06060a;
-      --blue: #00d4ff;
-      --purple: #7b2ff7;
-      --yellow: #f5c518;
-      --white: #efefef;
-      --gray: #0c0c14;
-      --border: rgba(255,255,255,0.07);
-      --muted: #4a4a6a;
-    }
-    html { scroll-behavior:smooth; }
-    body { background:var(--black); color:var(--white); font-family:'DM Sans',sans-serif; overflow-x:hidden; cursor:none; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Velorix — AI Automation & eCommerce</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--black:#06060a;--blue:#00d4ff;--purple:#7b2ff7;--yellow:#f5c518;--white:#efefef;--gray:#0c0c14;--border:rgba(255,255,255,0.07);--muted:#4a4a6a;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;cursor:none;}
+#cur{width:10px;height:10px;background:var(--blue);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;}
+#cur-ring{width:32px;height:32px;border:1.5px solid rgba(0,212,255,.35);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .35s ease;}
 
-    /* CURSOR */
-    #cur { width:10px; height:10px; background:var(--blue); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); mix-blend-mode:difference; }
-    #cur-ring { width:32px; height:32px; border:1.5px solid rgba(0,212,255,0.4); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform .35s ease; }
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;justify-content:space-between;align-items:center;padding:20px 60px;background:rgba(6,6,10,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:5px;text-decoration:none;color:var(--white);cursor:none;}
+.logo span{color:var(--blue);}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{color:var(--muted);text-decoration:none;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;transition:color .3s;padding-bottom:4px;border-bottom:2px solid transparent;cursor:none;}
+.nav-links a:hover,.nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+.nav-btn{background:transparent;border:1px solid var(--blue);color:var(--blue);padding:9px 26px;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:none;transition:all .3s;text-decoration:none;}
+.nav-btn:hover{background:var(--blue);color:var(--black);}
 
-    /* NAV */
-    nav { position:fixed; top:0; left:0; right:0; z-index:500; display:flex; justify-content:space-between; align-items:center; padding:20px 60px; background:rgba(6,6,10,.95); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); }
-    .logo { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:5px; }
-    .logo span { color:var(--blue); }
-    .nav-links { display:flex; gap:36px; list-style:none; }
-    .nav-links a { color:var(--muted); text-decoration:none; font-family:'Syne',sans-serif; font-size:11px; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; transition:color .3s; }
-    .nav-links a:hover { color:var(--white); }
-    .nav-btn { background:transparent; border:1px solid var(--blue); color:var(--blue); padding:9px 26px; font-family:'Syne',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:none; transition:all .3s; }
-    .nav-btn:hover { background:var(--blue); color:var(--black); }
+/* SIDEBAR */
+.sidebar{position:fixed;left:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:20px;z-index:100;align-items:center;}
+.sidebar::before,.sidebar::after{content:'';width:1px;height:36px;background:var(--border);}
+.sidebar a{color:var(--muted);text-decoration:none;font-family:'Syne',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-rl;transition:color .3s;cursor:none;}
+.sidebar a:hover{color:var(--blue);}
 
-    /* SIDEBAR */
-    .sidebar { position:fixed; left:20px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:20px; z-index:100; align-items:center; }
-    .sidebar::before,.sidebar::after { content:''; width:1px; height:36px; background:var(--border); }
-    .sidebar a { color:var(--muted); text-decoration:none; font-family:'Syne',sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; writing-mode:vertical-rl; transition:color .3s; }
-    .sidebar a:hover { color:var(--blue); }
+/* PAGES */
+.page{display:none;animation:pageIn .45s ease forwards;}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-    /* SHARED */
-    .section-tag { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--blue); margin-bottom:16px; display:flex; align-items:center; gap:14px; }
-    .section-tag::before { content:''; width:28px; height:1px; background:var(--blue); }
-    .section-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(40px,5vw,70px); line-height:1; letter-spacing:1px; }
-    .btn-glow { background:var(--blue); color:var(--black); padding:14px 36px; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; border:none; cursor:none; clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px)); transition:all .3s; text-decoration:none; display:inline-block; }
-    .btn-glow:hover { background:var(--purple); color:var(--white); }
-    .btn-link { color:var(--muted); font-family:'Syne',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; display:flex; align-items:center; gap:12px; text-decoration:none; transition:color .3s; }
-    .btn-link::before { content:''; width:36px; height:1px; background:var(--muted); transition:width .3s,background .3s; }
-    .btn-link:hover { color:var(--blue); }
-    .btn-link:hover::before { width:56px; background:var(--blue); }
+/* SPLINE — hide watermark */
+.spw{position:relative;width:100%;height:100%;}
+.spw iframe{width:100%;height:100%;border:none;display:block;}
+.spc{position:absolute;bottom:0;left:0;width:180px;height:48px;z-index:10;}
+.spc-k{background:var(--black);}
+.spc-g{background:var(--gray);}
 
-    /* ═══ ANIMATIONS ═══ */
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes fadeRight { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
-    @keyframes fadeLeft { from{opacity:0;transform:translateX(-60px)} to{opacity:1;transform:translateX(0)} }
-    @keyframes scrollDown { 0%{opacity:0;transform:scaleY(0);transform-origin:top} 60%{opacity:1} 100%{opacity:0;transform:scaleY(1);transform-origin:bottom} }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    @keyframes pulseGlow { 0%,100%{opacity:.6} 50%{opacity:1} }
+/* BUTTONS */
+.btn-glow{background:var(--blue);color:var(--black);padding:14px 38px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;border:none;cursor:none;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:all .3s;text-decoration:none;display:inline-block;}
+.btn-glow:hover{background:var(--purple);color:var(--white);}
+.btn-link{color:var(--muted);font-family:'Syne',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;display:inline-flex;align-items:center;gap:12px;text-decoration:none;transition:color .3s;cursor:none;}
+.btn-link::before{content:'';width:36px;height:1px;background:var(--muted);transition:width .3s,background .3s;}
+.btn-link:hover{color:var(--blue);}
+.btn-link:hover::before{width:56px;background:var(--blue);}
 
-    /* Hero animations */
-    .anim-badge   { animation: fadeUp .8s ease forwards; animation-delay:.3s; opacity:0; }
-    .anim-title   { animation: fadeUp 1s ease forwards;  animation-delay:.5s; opacity:0; }
-    .anim-desc    { animation: fadeUp .8s ease forwards; animation-delay:.8s; opacity:0; }
-    .anim-btns    { animation: fadeUp .8s ease forwards; animation-delay:1s;  opacity:0; }
-    .anim-3d-hero { animation: fadeRight 1.2s ease forwards; animation-delay:.6s; opacity:0; }
-    .anim-stat1   { animation: fadeUp .8s ease forwards; animation-delay:1.2s; opacity:0; }
-    .anim-stat2   { animation: fadeUp .8s ease forwards; animation-delay:1.4s; opacity:0; }
+/* HELPERS */
+.stag{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--blue);margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.stag::before{content:'';width:28px;height:1px;background:var(--blue);}
+.stitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,5vw,72px);line-height:1;letter-spacing:1px;}
+.sa{opacity:0;transform:translateY(44px);transition:opacity .85s ease,transform .85s ease;}
+.sa.sl{transform:translateX(-54px);}
+.sa.sr{transform:translateX(54px);}
+.sa.vis{opacity:1!important;transform:none!important;}
 
-    /* Scroll-triggered via IntersectionObserver */
-    .scroll-anim { opacity:0; transform:translateY(40px); transition:opacity .8s ease, transform .8s ease; }
-    .scroll-anim.left  { transform:translateX(-50px); }
-    .scroll-anim.right { transform:translateX(50px); }
-    .scroll-anim.visible { opacity:1 !important; transform:none !important; }
+/* INNER PAGE HERO */
+.ph{padding:140px 60px 90px 100px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.ph::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:70px 70px;}
+.phi{position:relative;z-index:2;}
+.ph-tag{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--blue);margin-bottom:20px;animation:fadeUp .8s ease forwards .3s;opacity:0;}
+.ph-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,11vw,150px);line-height:.88;letter-spacing:2px;animation:fadeUp 1s ease forwards .5s;opacity:0;}
+.ph-out{color:transparent;-webkit-text-stroke:1.5px var(--blue);}
+.ph-outp{color:transparent;-webkit-text-stroke:1.5px var(--purple);}
+.ph-desc{max-width:520px;font-size:15px;color:var(--muted);line-height:1.9;margin-top:22px;font-weight:300;animation:fadeUp .8s ease forwards .8s;opacity:0;}
 
-    /* ═══ HERO ═══ */
-    .hero { min-height:100vh; display:grid; grid-template-columns:1fr 1fr; align-items:center; padding:100px 60px 60px 100px; position:relative; overflow:hidden; }
-    .hero-bg-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px); background-size:70px 70px; pointer-events:none; }
-    .hero-bg-glow { position:absolute; inset:0; background:radial-gradient(ellipse 50% 60% at 75% 50%,rgba(123,47,247,.18) 0%,transparent 70%),radial-gradient(ellipse 30% 40% at 15% 70%,rgba(0,212,255,.08) 0%,transparent 60%); pointer-events:none; animation:pulseGlow 4s ease-in-out infinite; }
-    .hero-content { position:relative; z-index:3; }
-    .badge { display:inline-flex; align-items:center; gap:10px; background:rgba(0,212,255,.06); border:1px solid rgba(0,212,255,.18); padding:7px 18px; margin-bottom:28px; font-family:'Syne',sans-serif; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--blue); }
-    .badge-dot { width:6px; height:6px; background:var(--blue); border-radius:50%; animation:blink 1.8s ease-in-out infinite; }
-    .hero-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(60px,7vw,105px); line-height:.93; letter-spacing:1px; }
-    .hero-title .outline { color:transparent; -webkit-text-stroke:1.5px var(--blue); }
-    .hero-title .accent { color:var(--yellow); }
-    .hero-desc { max-width:400px; font-size:14px; font-weight:300; color:var(--muted); line-height:1.9; margin:26px 0 42px; }
-    .hero-btns { display:flex; gap:20px; align-items:center; }
-    .hero-3d { position:relative; z-index:3; height:580px; animation:float 6s ease-in-out infinite; }
-    .hero-3d iframe { width:100%; height:100%; border:none; }
-    .stat { position:absolute; background:rgba(255,255,255,.03); border:1px solid var(--border); backdrop-filter:blur(16px); padding:14px 22px; z-index:10; }
-    .stat.s1 { left:-10px; bottom:120px; }
-    .stat.s2 { right:10px; top:100px; }
-    .stat-n { font-family:'Bebas Neue',sans-serif; font-size:30px; color:var(--blue); line-height:1; }
-    .stat-l { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); font-family:'Syne',sans-serif; margin-top:3px; }
-    .scroll-ind { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; z-index:10; }
-    .scroll-ind span { font-family:'Syne',sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
-    .scroll-line { width:1px; height:40px; background:linear-gradient(to bottom,var(--blue),transparent); animation:scrollDown 1.8s ease-in-out infinite; }
+/* STATS STRIP */
+.sstrip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);}
+.ss{padding:56px 40px;text-align:center;border-right:1px solid var(--border);}
+.ss:last-child{border-right:none;}
+.ss-n{font-family:'Bebas Neue',sans-serif;font-size:68px;line-height:1;color:var(--blue);}
+.ss-l{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-family:'Syne',sans-serif;margin-top:8px;}
 
-    /* ═══ SERVICES ═══ */
-    .services { min-height:100vh; display:grid; grid-template-columns:1fr 1fr; align-items:center; padding:100px 60px 100px 100px; background:var(--gray); border-top:1px solid var(--border); gap:60px; position:relative; overflow:hidden; }
-    .services-bg { position:absolute; inset:0; background:radial-gradient(ellipse 50% 60% at 20% 50%,rgba(0,212,255,.07) 0%,transparent 70%); pointer-events:none; }
-    .services-3d { position:relative; z-index:3; height:560px; }
-    .services-3d iframe { width:100%; height:100%; border:none; }
-    .services-content { position:relative; z-index:3; }
-    .services-list { margin-top:48px; display:flex; flex-direction:column; gap:1px; background:var(--border); border:1px solid var(--border); }
-    .service-item { background:var(--gray); padding:28px 32px; display:flex; align-items:flex-start; gap:22px; transition:background .3s; position:relative; overflow:hidden; cursor:none; }
-    .service-item::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--blue); transform:scaleY(0); transform-origin:top; transition:transform .4s ease; }
-    .service-item:hover { background:rgba(0,212,255,.03); }
-    .service-item:hover::before { transform:scaleY(1); }
-    .service-num { font-family:'Bebas Neue',sans-serif; font-size:36px; color:rgba(255,255,255,.08); line-height:1; flex-shrink:0; transition:color .3s; }
-    .service-item:hover .service-num { color:rgba(0,212,255,.15); }
-    .service-name { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:8px; }
-    .service-desc { font-size:12px; color:var(--muted); line-height:1.8; font-weight:300; }
+/* FOOTER */
+footer{background:var(--gray);border-top:1px solid var(--border);padding:64px 60px 32px 100px;}
+.ft{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:52px;}
+.fb p{font-size:13px;color:var(--muted);line-height:1.85;max-width:260px;font-weight:300;margin-top:14px;}
+.fc h4{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:20px;}
+.fc a{display:block;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:10px;transition:color .3s;cursor:none;}
+.fc a:hover{color:var(--blue);}
+.fbot{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;}
+.fcopy{font-size:11px;color:var(--muted);font-family:'Syne',sans-serif;letter-spacing:1.5px;}
+.fsoc{display:flex;gap:20px;}
+.fsoc a{color:var(--muted);font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:color .3s;cursor:none;}
+.fsoc a:hover{color:var(--blue);}
 
-    /* ═══ ABOUT ═══ */
-    .about { padding:100px 60px 100px 100px; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; background:var(--black); border-top:1px solid var(--border); }
-    .about-stats { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); }
-    .about-stat { background:var(--black); padding:36px 30px; }
-    .about-stat-n { font-family:'Bebas Neue',sans-serif; font-size:56px; line-height:1; color:var(--blue); }
-    .about-stat-l { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; font-family:'Syne',sans-serif; color:var(--muted); margin-top:6px; }
-    .about-text p { font-size:14px; color:var(--muted); line-height:1.9; font-weight:300; margin-bottom:16px; }
-    .about-text p:last-of-type { margin-bottom:40px; }
+/* KEYFRAMES */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeRight{from{opacity:0;transform:translateX(70px)}to{opacity:1;transform:translateX(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes pulseGlow{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes scrollAnim{0%{opacity:0;transform:scaleY(0);transform-origin:top}60%{opacity:1}100%{opacity:0;transform:scaleY(1);transform-origin:bottom}}
 
-    /* ═══ PROCESS ═══ */
-    .process { padding:100px 60px 100px 100px; background:var(--gray); border-top:1px solid var(--border); }
-    .process-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:60px; }
-    .process-step { background:var(--gray); padding:44px 32px; position:relative; overflow:hidden; transition:background .3s; }
-    .process-step:hover { background:rgba(123,47,247,.05); }
-    .step-line { position:absolute; top:0; left:0; right:0; height:2px; background:var(--purple); transform:scaleX(0); transform-origin:left; transition:transform .5s ease; }
-    .process-step:hover .step-line { transform:scaleX(1); }
-    .step-num { font-family:'Bebas Neue',sans-serif; font-size:68px; line-height:1; color:rgba(255,255,255,.04); margin-bottom:20px; }
-    .step-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:12px; }
-    .step-desc { font-size:12px; color:var(--muted); line-height:1.8; font-weight:300; }
+/* ===== HOME ===== */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:100px 60px 60px 100px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:70px 70px;pointer-events:none;}
+.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 75% 50%,rgba(123,47,247,.18) 0%,transparent 70%),radial-gradient(ellipse 30% 45% at 10% 65%,rgba(0,212,255,.07) 0%,transparent 60%);pointer-events:none;animation:pulseGlow 5s ease-in-out infinite;}
+.hleft{position:relative;z-index:3;}
+.badge{display:inline-flex;align-items:center;gap:10px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.18);padding:7px 18px;margin-bottom:28px;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--blue);animation:fadeUp .8s ease forwards .3s;opacity:0;}
+.bdot{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:blink 1.8s ease-in-out infinite;}
+.htitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(62px,7.5vw,110px);line-height:.92;letter-spacing:1px;animation:fadeUp 1s ease forwards .5s;opacity:0;}
+.hout{color:transparent;-webkit-text-stroke:1.5px var(--blue);}
+.hacc{color:var(--yellow);}
+.hdesc{max-width:400px;font-size:14px;font-weight:300;color:var(--muted);line-height:1.9;margin:26px 0 42px;animation:fadeUp .8s ease forwards .8s;opacity:0;}
+.hbtns{display:flex;gap:20px;align-items:center;animation:fadeUp .8s ease forwards 1s;opacity:0;}
+.hright{position:relative;z-index:3;height:580px;animation:fadeRight 1.2s ease forwards .5s;opacity:0;}
+.hstat{position:absolute;background:rgba(6,6,10,.85);border:1px solid var(--border);backdrop-filter:blur(16px);padding:14px 22px;z-index:20;animation:fadeUp .8s ease forwards;opacity:0;}
+.hstat.s1{left:-10px;bottom:110px;animation-delay:1.2s;}
+.hstat.s2{right:10px;top:90px;animation-delay:1.4s;}
+.hsn{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--blue);line-height:1;}
+.hsl{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);font-family:'Syne',sans-serif;margin-top:3px;}
+.scind{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:10;}
+.scind span{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+.scline{width:1px;height:44px;background:linear-gradient(to bottom,var(--blue),transparent);animation:scrollAnim 1.8s ease-in-out infinite;}
+.svcsec{padding:100px 60px 100px 100px;background:var(--gray);border-top:1px solid var(--border);}
+.svcgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.svcc{background:var(--gray);padding:48px 44px;position:relative;overflow:hidden;transition:background .4s;}
+.svcc::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--blue);transition:height .4s;}
+.svcc:hover::before{height:100%;}
+.svcc:hover{background:rgba(0,212,255,.03);}
+.svbg{font-family:'Bebas Neue',sans-serif;font-size:60px;color:rgba(255,255,255,.04);position:absolute;top:16px;right:28px;line-height:1;}
+.svico{width:44px;height:44px;border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.svico svg{width:20px;height:20px;}
+.svname{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:12px;}
+.svd{font-size:12px;color:var(--muted);line-height:1.85;font-weight:300;}
+.svlnk{display:inline-flex;align-items:center;gap:10px;margin-top:22px;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue);text-decoration:none;transition:gap .3s;cursor:none;}
+.svlnk:hover{gap:18px;}
+.why{padding:100px 60px 100px 100px;background:var(--black);border-top:1px solid var(--border);}
+.whygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.whyi{background:var(--black);padding:48px 40px;transition:background .3s;}
+.whyi:hover{background:rgba(123,47,247,.04);}
+.wyn{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--purple);opacity:.25;line-height:1;margin-bottom:14px;}
+.wyt{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:12px;}
+.wyd{font-size:13px;color:var(--muted);line-height:1.8;font-weight:300;}
+.ctaband{padding:120px 60px 120px 100px;background:var(--gray);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr auto;align-items:center;gap:80px;}
+.ctat{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6.5vw,92px);line-height:.93;}
+.ctat span{color:var(--blue);}
+.ctar{display:flex;flex-direction:column;gap:16px;align-items:flex-end;}
 
-    /* ═══ CONTACT ═══ */
-    .contact { min-height:80vh; display:grid; grid-template-columns:1fr 1fr; align-items:center; padding:100px 60px 100px 100px; background:var(--black); border-top:1px solid var(--border); gap:60px; position:relative; overflow:hidden; }
-    .contact-bg { position:absolute; inset:0; background:radial-gradient(ellipse 50% 60% at 80% 50%,rgba(123,47,247,.12) 0%,transparent 70%); pointer-events:none; }
-    .contact-form-wrap { position:relative; z-index:3; }
-    .contact-form { display:flex; flex-direction:column; gap:18px; margin-top:40px; }
-    .form-group { display:flex; flex-direction:column; gap:7px; }
-    .form-group label { font-family:'Syne',sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
-    .form-group input,.form-group textarea,.form-group select { background:rgba(255,255,255,.03); border:1px solid var(--border); color:var(--white); padding:13px 16px; font-family:'DM Sans',sans-serif; font-size:13px; transition:border-color .3s; outline:none; cursor:none; }
-    .form-group input:focus,.form-group textarea:focus,.form-group select:focus { border-color:var(--blue); }
-    .form-group select option { background:#0c0c14; }
-    .form-group textarea { resize:vertical; min-height:110px; }
-    .submit-btn { background:var(--blue); color:var(--black); border:none; padding:16px; font-family:'Syne',sans-serif; font-size:12px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; cursor:none; clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px)); transition:background .3s; margin-top:6px; }
-    .submit-btn:hover { background:var(--purple); color:var(--white); }
-    .contact-3d { position:relative; z-index:3; height:560px; }
-    .contact-3d iframe { width:100%; height:100%; border:none; }
+/* ===== ABOUT ===== */
+.story{padding:100px 60px 100px 100px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;border-bottom:1px solid var(--border);}
+.stvis{height:480px;background:var(--gray);border:1px solid var(--border);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.stvtxt{font-family:'Bebas Neue',sans-serif;font-size:110px;color:rgba(0,212,255,.06);letter-spacing:8px;}
+.stvacc{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--blue),var(--purple));}
+.stc p{font-size:14px;color:var(--muted);line-height:1.9;font-weight:300;margin-bottom:18px;}
+.vals{padding:100px 60px 100px 100px;background:var(--gray);border-bottom:1px solid var(--border);}
+.valgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.valc{background:var(--gray);padding:48px 40px;transition:background .3s;}
+.valc:hover{background:rgba(0,212,255,.03);}
+.valn{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--blue);opacity:.3;line-height:1;margin-bottom:14px;}
+.valt{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:12px;}
+.vald{font-size:13px;color:var(--muted);line-height:1.8;font-weight:300;}
+.team{padding:100px 60px 100px 100px;background:var(--black);border-bottom:1px solid var(--border);}
+.teamgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.teamc{background:var(--black);padding:44px 36px;text-align:center;transition:background .3s;}
+.teamc:hover{background:rgba(123,47,247,.04);}
+.teamav{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--black);}
+.teamname{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;}
+.teamrole{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-family:'Syne',sans-serif;margin-bottom:12px;}
+.teambio{font-size:12px;color:var(--muted);line-height:1.8;font-weight:300;}
 
-    /* FOOTER */
-    footer { background:var(--gray); border-top:1px solid var(--border); padding:36px 60px 36px 100px; display:flex; justify-content:space-between; align-items:center; }
-    footer .logo { font-size:22px; }
-    .footer-copy { font-size:11px; color:var(--muted); font-family:'Syne',sans-serif; letter-spacing:1.5px; }
-    .footer-socials { display:flex; gap:20px; }
-    .footer-socials a { color:var(--muted); font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; text-decoration:none; transition:color .3s; }
-    .footer-socials a:hover { color:var(--blue); }
+/* ===== SERVICES ===== */
+.featured{min-height:80vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:100px 60px 100px 100px;background:var(--gray);border-bottom:1px solid var(--border);gap:60px;position:relative;overflow:hidden;}
+.featured::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 15% 50%,rgba(0,212,255,.06) 0%,transparent 70%);pointer-events:none;}
+.feat3d{height:520px;position:relative;z-index:2;}
+.featc{position:relative;z-index:2;}
+.featc h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,5vw,78px);line-height:.95;margin-bottom:24px;}
+.featc h2 span{color:var(--blue);}
+.featc p{font-size:14px;color:var(--muted);line-height:1.9;font-weight:300;margin-bottom:16px;}
+.allsvc{padding:100px 60px 100px 100px;background:var(--black);}
+.svcrows{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.svcrow{background:var(--black);padding:40px 56px;display:grid;grid-template-columns:72px 1fr 2fr auto;align-items:center;gap:44px;transition:background .3s;position:relative;}
+.svcrow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);transform:scaleY(0);transform-origin:top;transition:transform .4s;}
+.svcrow:hover{background:rgba(0,212,255,.025);}
+.svcrow:hover::before{transform:scaleY(1);}
+.srn{font-family:'Bebas Neue',sans-serif;font-size:60px;color:rgba(255,255,255,.05);line-height:1;}
+.srt{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;}
+.srd{font-size:13px;color:var(--muted);line-height:1.85;font-weight:300;}
+.srcta a{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:10px;transition:gap .3s;cursor:none;}
+.srcta a:hover{gap:18px;}
+.proc{padding:100px 60px 100px 100px;background:var(--gray);border-top:1px solid var(--border);}
+.procgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.procs{background:var(--gray);padding:44px 32px;position:relative;overflow:hidden;transition:background .3s;}
+.procs:hover{background:rgba(123,47,247,.05);}
+.psline{position:absolute;top:0;left:0;right:0;height:2px;background:var(--purple);transform:scaleX(0);transform-origin:left;transition:transform .5s;}
+.procs:hover .psline{transform:scaleX(1);}
+.psn{font-family:'Bebas Neue',sans-serif;font-size:66px;line-height:1;color:rgba(255,255,255,.04);margin-bottom:18px;}
+.pst{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:10px;}
+.psd{font-size:12px;color:var(--muted);line-height:1.8;font-weight:300;}
 
-    @media(max-width:900px){
-      nav { padding:18px 24px; }
-      .nav-links { display:none; }
-      .hero,.services,.about,.contact { grid-template-columns:1fr; padding:90px 24px 60px; }
-      .hero-3d,.services-3d,.contact-3d { height:340px; }
-      .stat { display:none; }
-      .process-grid { grid-template-columns:1fr 1fr; }
-      .process,.about { padding:70px 24px; }
-      footer { flex-direction:column; gap:16px; padding:28px 24px; text-align:center; }
-      .sidebar { display:none; }
-    }
-  </style>
+/* ===== PROJECTS ===== */
+.projsec{padding:100px 60px 100px 100px;background:var(--black);}
+.projgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:56px;}
+.projc{background:var(--black);padding:52px 48px;position:relative;overflow:hidden;transition:background .4s;}
+.projc:hover{background:rgba(0,212,255,.02);}
+.projc.sp2{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.projbadge{display:inline-block;font-family:'Syne',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--blue);border:1px solid rgba(0,212,255,.2);padding:4px 14px;margin-bottom:20px;}
+.projbg{font-family:'Bebas Neue',sans-serif;font-size:80px;color:rgba(255,255,255,.03);position:absolute;top:10px;right:24px;line-height:1;}
+.projt{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3vw,42px);line-height:1.05;margin-bottom:16px;}
+.projd{font-size:13px;color:var(--muted);line-height:1.85;font-weight:300;margin-bottom:22px;}
+.projtechs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.projtech{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);padding:4px 12px;}
+.projres{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--yellow);line-height:1;}
+.projresl{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);font-family:'Syne',sans-serif;margin-top:4px;}
+.projvis{height:280px;background:var(--gray);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:90px;color:rgba(0,212,255,.05);}
+.projcta{padding:120px 60px;background:var(--gray);border-top:1px solid var(--border);text-align:center;}
+.projcta h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,7.5vw,104px);line-height:.93;margin-bottom:28px;}
+.projcta h2 span{color:var(--blue);}
+.projcta p{font-size:15px;color:var(--muted);max-width:480px;margin:0 auto 44px;line-height:1.85;font-weight:300;}
+
+/* ===== CONTACT ===== */
+.chero{min-height:55vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:120px 60px 60px 100px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);gap:60px;}
+.chero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:70px 70px;}
+.chero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 75% 50%,rgba(123,47,247,.15) 0%,transparent 70%);pointer-events:none;}
+.chc{position:relative;z-index:2;}
+.chtag{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--blue);margin-bottom:20px;animation:fadeUp .8s ease forwards .3s;opacity:0;}
+.chtitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,8.5vw,118px);line-height:.88;animation:fadeUp 1s ease forwards .5s;opacity:0;}
+.chout{color:transparent;-webkit-text-stroke:1.5px var(--blue);}
+.chdesc{max-width:400px;font-size:14px;color:var(--muted);line-height:1.9;margin-top:22px;font-weight:300;animation:fadeUp .8s ease forwards .8s;opacity:0;}
+.chrobot{position:relative;z-index:2;height:440px;animation:fadeUp 1s ease forwards .6s;opacity:0;}
+.cmain{padding:100px 60px 100px 100px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;border-bottom:1px solid var(--border);}
+.cftag{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--blue);margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.cftag::before{content:'';width:28px;height:1px;background:var(--blue);}
+.cftitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4vw,56px);line-height:1;margin-bottom:36px;}
+.cftitle span{color:var(--blue);}
+.cform{display:flex;flex-direction:column;gap:18px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.fg{display:flex;flex-direction:column;gap:7px;}
+.fg label{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+.fg input,.fg textarea,.fg select{background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:13px;transition:border-color .3s;outline:none;cursor:none;-webkit-appearance:none;}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--blue);}
+.fg select option{background:#0c0c14;}
+.fg textarea{resize:vertical;min-height:120px;}
+.subbtn{background:var(--blue);color:var(--black);border:none;padding:16px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;cursor:none;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .3s;margin-top:8px;}
+.subbtn:hover{background:var(--purple);color:var(--white);}
+.ciwrap h3{font-family:'Bebas Neue',sans-serif;font-size:38px;margin-bottom:8px;}
+.ciwrap>p{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:36px;font-weight:300;}
+.ciitem{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(--border);align-items:center;}
+.ciico{width:42px;height:42px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ciico svg{width:17px;height:17px;stroke:var(--blue);fill:none;stroke-width:1.5;}
+.cilbl{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.cival{font-size:13px;color:var(--white);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:18px 24px;}.nav-links,.sidebar{display:none;}
+  .hero{grid-template-columns:1fr;padding:96px 24px 60px;}.hright{height:340px;}.hstat{display:none;}
+  .svcsec,.why,.ctaband,.story,.vals,.team,.featured,.allsvc,.proc,.projsec,.projcta,.cmain{padding:72px 24px;}
+  .svcgrid,.whygrid,.valgrid,.teamgrid{grid-template-columns:1fr;}
+  .sstrip{grid-template-columns:1fr 1fr;}.ctaband{grid-template-columns:1fr;}.ctar{align-items:flex-start;}
+  .story{grid-template-columns:1fr;}.featured{grid-template-columns:1fr;}.feat3d{height:320px;}
+  .svcrow{grid-template-columns:1fr;gap:12px;padding:32px 24px;}.procgrid{grid-template-columns:1fr 1fr;}
+  .projgrid{grid-template-columns:1fr;}.projc.sp2{grid-column:span 1;grid-template-columns:1fr;}
+  .chero{grid-template-columns:1fr;padding:90px 24px 60px;}.chrobot{height:300px;}.frow{grid-template-columns:1fr;}
+  .ph{padding:100px 24px 60px;}
+  footer{padding:44px 24px 28px;}.ft{grid-template-columns:1fr 1fr;gap:32px;}.fbot{flex-direction:column;gap:14px;text-align:center;}
+}
+</style>
 </head>
 <body>
-
 <div id="cur"></div>
 <div id="cur-ring"></div>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">VEL<span>O</span>RIX</div>
+  <a href="#" class="logo" data-p="home">VEL<span>O</span>RIX</a>
   <ul class="nav-links">
-    <li><a href="#services">Services</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#process">Process</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#" data-p="home" class="active">Home</a></li>
+    <li><a href="#" data-p="about">About</a></li>
+    <li><a href="#" data-p="services">Services</a></li>
+    <li><a href="#" data-p="projects">Projects</a></li>
+    <li><a href="#" data-p="contact">Contact</a></li>
   </ul>
-  <button class="nav-btn">Get Started</button>
+  <a href="#" class="nav-btn" data-p="contact">Get Started</a>
 </nav>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-  <a href="#">Instagram</a>
-  <a href="#">LinkedIn</a>
-  <a href="#">GitHub</a>
+  <a href="https://instagram.com" target="_blank">Instagram</a>
+  <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  <a href="https://github.com" target="_blank">GitHub</a>
 </div>
 
-<!-- ═══ HERO ═══ -->
-<section class="hero" id="home">
-  <div class="hero-bg-grid"></div>
-  <div class="hero-bg-glow"></div>
+<!-- ==================== HOME ==================== -->
+<div id="p-home" class="page active">
 
-  <div class="hero-content">
-    <div class="badge anim-badge"><span class="badge-dot"></span> AI · Automation · eCommerce</div>
-    <h1 class="hero-title anim-title">
-      WHAT<br>
-      <span class="outline">WE</span><br>
-      <span class="accent">OFFER</span>
-    </h1>
-    <p class="hero-desc anim-desc">Velorix builds intelligent AI automation systems and high-converting eCommerce solutions — engineered for results, built for the future.</p>
-    <div class="hero-btns anim-btns">
-      <a href="#services" class="btn-glow">Explore Services</a>
-      <a href="#contact" class="btn-link">Work With Us</a>
+<section class="hero">
+  <div class="hero-bg"></div><div class="hero-glow"></div>
+  <div class="hleft">
+    <div class="badge"><span class="bdot"></span>AI · Automation · eCommerce</div>
+    <h1 class="htitle">WHAT<br><span class="hout">WE</span><br><span class="hacc">OFFER</span></h1>
+    <p class="hdesc">Velorix builds intelligent AI automation systems and high-converting eCommerce solutions — engineered for results, built for the future.</p>
+    <div class="hbtns">
+      <a href="#" class="btn-glow" data-p="services">Explore Services</a>
+      <a href="#" class="btn-link" data-p="contact">Work With Us</a>
     </div>
   </div>
-
-  <div class="hero-3d anim-3d-hero">
-    <div class="stat s1 anim-stat1"><div class="stat-n">50+</div><div class="stat-l">Projects Done</div></div>
-    <iframe src='https://my.spline.design/robotfollowcursorforlandingpagemalkit0-iQ9JrDdmlQOP94lL0ZInxxoD/' frameborder='0' width='100%' height='100%' allow="autoplay"></iframe>
-    <div class="stat s2 anim-stat2"><div class="stat-n">98%</div><div class="stat-l">Satisfaction</div></div>
+  <div class="hright">
+    <div class="hstat s1"><div class="hsn">50+</div><div class="hsl">Projects Done</div></div>
+    <div class="spw" style="height:100%;">
+      <iframe src='https://my.spline.design/robotfollowcursorforlandingpagemalkit0-iQ9JrDdmlQOP94lL0ZInxxoD/' allow="autoplay"></iframe>
+      <div class="spc spc-k"></div>
+    </div>
+    <div class="hstat s2"><div class="hsn">98%</div><div class="hsl">Satisfaction</div></div>
   </div>
+  <div class="scind"><span>Scroll</span><div class="scline"></div></div>
+</section>
 
-  <div class="scroll-ind">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
+<section class="svcsec">
+  <div class="stag sa">What We Do</div>
+  <h2 class="stitle sa">OUR <span style="color:var(--blue)">SERVICES</span></h2>
+  <div class="svcgrid">
+    <div class="svcc sa"><div class="svbg">01</div><div class="svico"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div class="svname">AI Automation</div><div class="svd">Intelligent workflows using n8n, Python, and LangChain — eliminating repetitive tasks and scaling operations.</div><a href="#" class="svlnk" data-p="services">Learn More →</a></div>
+    <div class="svcc sa"><div class="svbg">02</div><div class="svico"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><div class="svname">eCommerce Automation</div><div class="svd">Full eBay & Amazon dropshipping automation for USA & UK markets — product hunting to order management.</div><a href="#" class="svlnk" data-p="services">Learn More →</a></div>
+    <div class="svcc sa"><div class="svbg">03</div><div class="svico"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="svname">AI Chatbot Development</div><div class="svd">Custom GPT-powered chatbots for customer support, lead generation, and 24/7 business automation.</div><a href="#" class="svlnk" data-p="services">Learn More →</a></div>
+    <div class="svcc sa"><div class="svbg">04</div><div class="svico"><svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="svname">Data Scraping & Research</div><div class="svd">Automated data extraction, competitor analysis, and market research bots — the intelligence edge.</div><a href="#" class="svlnk" data-p="services">Learn More →</a></div>
   </div>
 </section>
 
-<!-- ═══ SERVICES ═══ -->
-<section class="services" id="services">
-  <div class="services-bg"></div>
-  <div class="services-3d scroll-anim left">
-    <iframe src='https://my.spline.design/aiassistanthoverandclickinteraction-lcqLwLEEgIDLbdxWi9s2Z4MW/' frameborder='0' width='100%' height='100%' allow="autoplay"></iframe>
-  </div>
-  <div class="services-content scroll-anim right">
-    <div class="section-tag">What We Do</div>
-    <h2 class="section-title">OUR<br><span style="color:var(--blue)">SERVICES</span></h2>
-    <div class="services-list">
-      <div class="service-item">
-        <div class="service-num">01</div>
-        <div class="service-text">
-          <div class="service-name">AI Automation</div>
-          <div class="service-desc">Intelligent workflows using n8n, Python, and LangChain — eliminating repetitive tasks and scaling your operations effortlessly.</div>
-        </div>
-      </div>
-      <div class="service-item">
-        <div class="service-num">02</div>
-        <div class="service-text">
-          <div class="service-name">eCommerce Automation</div>
-          <div class="service-desc">Full eBay & Amazon dropshipping — product hunting, listing optimization, and order management for USA & UK markets.</div>
-        </div>
-      </div>
-      <div class="service-item">
-        <div class="service-num">03</div>
-        <div class="service-text">
-          <div class="service-name">AI Chatbot Development</div>
-          <div class="service-desc">Custom GPT-powered chatbots for customer support, lead generation, and 24/7 business automation on any platform.</div>
-        </div>
-      </div>
-      <div class="service-item">
-        <div class="service-num">04</div>
-        <div class="service-text">
-          <div class="service-name">Data Scraping & Research</div>
-          <div class="service-desc">Automated data extraction, competitor analysis, and market research bots — giving you the intelligence edge.</div>
-        </div>
-      </div>
-    </div>
+<div class="sstrip">
+  <div class="ss sa"><div class="ss-n">50+</div><div class="ss-l">Projects</div></div>
+  <div class="ss sa"><div class="ss-n">3+</div><div class="ss-l">Years Exp</div></div>
+  <div class="ss sa"><div class="ss-n">20+</div><div class="ss-l">Clients</div></div>
+  <div class="ss sa"><div class="ss-n">98%</div><div class="ss-l">Satisfaction</div></div>
+</div>
+
+<section class="why">
+  <div class="stag sa">Why Choose Us</div>
+  <h2 class="stitle sa">WHY <span style="color:var(--purple)">VELORIX</span></h2>
+  <div class="whygrid">
+    <div class="whyi sa"><div class="wyn">01</div><div class="wyt">Results Driven</div><div class="wyd">Every solution we build is measured by real outcomes — revenue, time saved, and growth for your business.</div></div>
+    <div class="whyi sa" style="transition-delay:.15s"><div class="wyn">02</div><div class="wyt">Cutting Edge Tech</div><div class="wyd">We use the latest AI tools — GPT-4, LangChain, n8n, Python — to build automations years ahead of competition.</div></div>
+    <div class="whyi sa" style="transition-delay:.3s"><div class="wyn">03</div><div class="wyt">Full Support</div><div class="wyd">We don't just build and leave. Ongoing support ensures everything runs perfectly 24/7.</div></div>
   </div>
 </section>
 
-<!-- ═══ ABOUT ═══ -->
-<section class="about" id="about">
-  <div class="about-stats scroll-anim left">
-    <div class="about-stat"><div class="about-stat-n">50+</div><div class="about-stat-l">Projects Delivered</div></div>
-    <div class="about-stat"><div class="about-stat-n">3+</div><div class="about-stat-l">Years Experience</div></div>
-    <div class="about-stat"><div class="about-stat-n">20+</div><div class="about-stat-l">Happy Clients</div></div>
-    <div class="about-stat"><div class="about-stat-n">98%</div><div class="about-stat-l">Satisfaction Rate</div></div>
-  </div>
-  <div class="about-text scroll-anim right">
-    <div class="section-tag">Who We Are</div>
-    <h2 class="section-title" style="margin-bottom:28px">ABOUT<br><span style="color:var(--blue)">VELORIX</span></h2>
-    <p>Velorix is an AI automation and eCommerce agency built for the modern digital economy. We combine cutting-edge AI with deep market knowledge to deliver solutions that actually work.</p>
-    <p>From intelligent n8n workflows to fully automated eBay dropshipping systems — we engineer tools that save time, reduce cost, and maximize profit for our clients worldwide.</p>
-    <a href="#contact" class="btn-glow">Let's Talk</a>
-  </div>
+<section class="ctaband">
+  <div class="sa"><div class="stag">Ready To Start?</div><h2 class="ctat">LET'S BUILD<br>SOMETHING<br><span>GREAT</span></h2></div>
+  <div class="ctar sa sr"><a href="#" class="btn-glow" data-p="contact">Start A Project</a><a href="#" class="btn-link" data-p="projects">View Our Work</a></div>
 </section>
 
-<!-- ═══ PROCESS ═══ -->
-<section class="process" id="process">
-  <div class="section-tag scroll-anim">How It Works</div>
-  <h2 class="section-title scroll-anim">OUR<br><span style="color:var(--purple)">PROCESS</span></h2>
-  <div class="process-grid">
-    <div class="process-step scroll-anim" style="transition-delay:.1s">
-      <div class="step-line"></div>
-      <div class="step-num">01</div>
-      <div class="step-title">Discovery Call</div>
-      <div class="step-desc">We understand your business goals, challenges, and what automation can solve for you.</div>
-    </div>
-    <div class="process-step scroll-anim" style="transition-delay:.2s">
-      <div class="step-line"></div>
-      <div class="step-num">02</div>
-      <div class="step-title">Strategy & Plan</div>
-      <div class="step-desc">We map out the exact workflow, tools, and timeline needed to execute your project flawlessly.</div>
-    </div>
-    <div class="process-step scroll-anim" style="transition-delay:.3s">
-      <div class="step-line"></div>
-      <div class="step-num">03</div>
-      <div class="step-title">Build & Test</div>
-      <div class="step-desc">Our team builds, tests, and refines every automation to ensure zero errors and peak performance.</div>
-    </div>
-    <div class="process-step scroll-anim" style="transition-delay:.4s">
-      <div class="step-line"></div>
-      <div class="step-num">04</div>
-      <div class="step-title">Launch & Support</div>
-      <div class="step-desc">We deploy your solution and provide ongoing support to keep everything running smoothly.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ CONTACT ═══ -->
-<section class="contact" id="contact">
-  <div class="contact-bg"></div>
-  <div class="contact-form-wrap scroll-anim left">
-    <div class="section-tag">Get In Touch</div>
-    <h2 class="section-title">LET'S<br><span style="color:var(--blue)">WORK</span></h2>
-    <div class="contact-form">
-      <div class="form-group"><label>Your Name</label><input type="text" placeholder="John Doe"/></div>
-      <div class="form-group"><label>Email Address</label><input type="email" placeholder="john@example.com"/></div>
-      <div class="form-group">
-        <label>Service Needed</label>
-        <select><option>AI Automation</option><option>eCommerce Automation</option><option>AI Chatbot</option><option>Data Scraping</option></select>
-      </div>
-      <div class="form-group"><label>Message</label><textarea placeholder="Tell us about your project..."></textarea></div>
-      <button class="submit-btn">Send Message</button>
-    </div>
-  </div>
-  <div class="contact-3d scroll-anim right">
-    <iframe src='https://my.spline.design/genkubgreetingrobot-wCrJCz6LpOv6WLCutfaqq1ja/' frameborder='0' width='100%' height='100%' allow="autoplay"></iframe>
-  </div>
-</section>
-
-<!-- FOOTER -->
 <footer>
-  <div class="logo">VEL<span>O</span>RIX</div>
-  <div class="footer-copy">© 2025 Velorix. All rights reserved.</div>
-  <div class="footer-socials">
-    <a href="#">Instagram</a>
-    <a href="#">LinkedIn</a>
-    <a href="#">GitHub</a>
+  <div class="ft">
+    <div class="fb"><a href="#" class="logo" data-p="home">VEL<span>O</span>RIX</a><p>AI automation and eCommerce agency built for the modern digital economy.</p></div>
+    <div class="fc"><h4>Pages</h4><a href="#" data-p="home">Home</a><a href="#" data-p="about">About</a><a href="#" data-p="services">Services</a><a href="#" data-p="projects">Projects</a><a href="#" data-p="contact">Contact</a></div>
+    <div class="fc"><h4>Services</h4><a href="#" data-p="services">AI Automation</a><a href="#" data-p="services">eCommerce</a><a href="#" data-p="services">AI Chatbot</a><a href="#" data-p="services">Data Scraping</a></div>
+    <div class="fc"><h4>Contact</h4><a href="mailto:contact@velorix.com">contact@velorix.com</a><a href="#">+92 300 0000000</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
   </div>
+  <div class="fbot"><div class="fcopy">© 2025 Velorix. All rights reserved.</div><div class="fsoc"><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">GitHub</a></div></div>
 </footer>
+</div>
+
+<!-- ==================== ABOUT ==================== -->
+<div id="p-about" class="page">
+
+<section class="ph">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 80% 50%,rgba(123,47,247,.14) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="phi">
+    <div class="ph-tag">Who We Are</div>
+    <h1 class="ph-title">ABOUT<br><span class="ph-out">VELORIX</span></h1>
+    <p class="ph-desc">A team of AI engineers and eCommerce specialists building the future of business automation — one workflow at a time.</p>
+  </div>
+</section>
+
+<div class="sstrip">
+  <div class="ss sa"><div class="ss-n">50+</div><div class="ss-l">Projects</div></div>
+  <div class="ss sa"><div class="ss-n">3+</div><div class="ss-l">Years Exp</div></div>
+  <div class="ss sa"><div class="ss-n">20+</div><div class="ss-l">Clients</div></div>
+  <div class="ss sa"><div class="ss-n">98%</div><div class="ss-l">Satisfaction</div></div>
+</div>
+
+<section class="story">
+  <div class="stvis sa sl"><div class="stvtxt">AI</div><div class="stvacc"></div></div>
+  <div class="stc sa sr">
+    <div class="stag">Our Story</div>
+    <h2 class="stitle" style="margin-bottom:28px">HOW WE<br><span style="color:var(--blue)">STARTED</span></h2>
+    <p>Velorix was founded with a single mission — to make powerful AI automation accessible to businesses of all sizes. We saw the gap between complex AI tools and real-world business needs.</p>
+    <p>Starting with eBay dropshipping automation for UK and USA markets, we expanded into full-stack AI solutions — chatbots, data pipelines, LangChain agents, and beyond.</p>
+    <p>Today, Velorix serves clients worldwide, delivering automation systems that save time, reduce costs, and drive measurable growth.</p>
+    <a href="#" class="btn-glow" data-p="contact" style="margin-top:16px">Work With Us</a>
+  </div>
+</section>
+
+<section class="vals">
+  <div class="stag sa">What Drives Us</div>
+  <h2 class="stitle sa">OUR <span style="color:var(--purple)">VALUES</span></h2>
+  <div class="valgrid">
+    <div class="valc sa"><div class="valn">01</div><div class="valt">Innovation First</div><div class="vald">We stay ahead of the curve, constantly exploring new AI tools to deliver solutions competitors can't match.</div></div>
+    <div class="valc sa" style="transition-delay:.15s"><div class="valn">02</div><div class="valt">Client Success</div><div class="vald">Your success is our success. Every project is measured by real impact — revenue, time saved, problems solved.</div></div>
+    <div class="valc sa" style="transition-delay:.3s"><div class="valn">03</div><div class="valt">Transparency</div><div class="vald">No black boxes. We explain what we build and how it works — so you're always in control.</div></div>
+  </div>
+</section>
+
+<section class="team">
+  <div class="stag sa">The People</div>
+  <h2 class="stitle sa">OUR <span style="color:var(--blue)">TEAM</span></h2>
+  <div class="teamgrid">
+    <div class="teamc sa"><div class="teamav">VX</div><div class="teamname">Founder</div><div class="teamrole">AI Engineer</div><div class="teambio">Python, n8n, LangChain specialist building AI automation systems that scale businesses worldwide.</div></div>
+    <div class="teamc sa" style="transition-delay:.15s"><div class="teamav">EC</div><div class="teamname">eCommerce Lead</div><div class="teamrole">Marketplace Strategist</div><div class="teambio">Expert in eBay & Amazon dropshipping automation, product research, and marketplace optimization.</div></div>
+    <div class="teamc sa" style="transition-delay:.3s"><div class="teamav">DV</div><div class="teamname">Dev Team</div><div class="teamrole">Backend & Integrations</div><div class="teambio">Full-stack developers specializing in API integrations, data pipelines, and automation infrastructure.</div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft">
+    <div class="fb"><a href="#" class="logo" data-p="home">VEL<span>O</span>RIX</a><p>AI automation and eCommerce agency built for the modern digital economy.</p></div>
+    <div class="fc"><h4>Pages</h4><a href="#" data-p="home">Home</a><a href="#" data-p="about">About</a><a href="#" data-p="services">Services</a><a href="#" data-p="projects">Projects</a><a href="#" data-p="contact">Contact</a></div>
+    <div class="fc"><h4>Services</h4><a href="#" data-p="services">AI Automation</a><a href="#" data-p="services">eCommerce</a><a href="#" data-p="services">AI Chatbot</a><a href="#" data-p="services">Data Scraping</a></div>
+    <div class="fc"><h4>Contact</h4><a href="mailto:contact@velorix.com">contact@velorix.com</a><a href="#">+92 300 0000000</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+  </div>
+  <div class="fbot"><div class="fcopy">© 2025 Velorix. All rights reserved.</div><div class="fsoc"><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">GitHub</a></div></div>
+</footer>
+</div>
+
+<!-- ==================== SERVICES ==================== -->
+<div id="p-services" class="page">
+
+<section class="ph">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 80% 50%,rgba(0,212,255,.1) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="phi">
+    <div class="ph-tag">What We Offer</div>
+    <h1 class="ph-title">OUR<br><span class="ph-out">SERVICES</span></h1>
+    <p class="ph-desc">From AI automation workflows to full eCommerce systems — we build solutions that scale your business on autopilot.</p>
+  </div>
+</section>
+
+<section class="featured">
+  <div class="feat3d sa sl">
+    <div class="spw" style="height:100%;">
+      <iframe src='https://my.spline.design/aiassistanthoverandclickinteraction-lcqLwLEEgIDLbdxWi9s2Z4MW/' allow="autoplay"></iframe>
+      <div class="spc spc-g"></div>
+    </div>
+  </div>
+  <div class="featc sa sr">
+    <div class="stag">Featured Service</div>
+    <h2>AI <span>AUTOMATION</span><br>SYSTEMS</h2>
+    <p>We build end-to-end AI automation using n8n, Python, and LangChain. From data pipelines to intelligent agents — we automate the repetitive so you can focus on what matters.</p>
+    <p>Our automations run 24/7, integrate with your existing tools, and scale as your business grows — zero ongoing maintenance required.</p>
+    <a href="#" class="btn-glow" data-p="contact" style="margin-top:16px">Start This Project</a>
+  </div>
+</section>
+
+<section class="allsvc">
+  <div class="stag sa">All Services</div>
+  <h2 class="stitle sa">WHAT WE <span style="color:var(--blue)">BUILD</span></h2>
+  <div class="svcrows">
+    <div class="svcrow sa"><div class="srn">01</div><div class="srt">AI Automation</div><div class="srd">Intelligent workflows using n8n, Python, and LangChain. We automate repetitive tasks, connect your apps, and run your business on autopilot — saving hours every day.</div><div class="srcta"><a href="#" data-p="contact">Start →</a></div></div>
+    <div class="svcrow sa"><div class="srn">02</div><div class="srt">eCommerce Automation</div><div class="srd">Full eBay & Amazon dropshipping — product hunting from China, listing creation, price monitoring, and order management for USA & UK markets. Scale without hiring.</div><div class="srcta"><a href="#" data-p="contact">Start →</a></div></div>
+    <div class="svcrow sa"><div class="srn">03</div><div class="srt">AI Chatbot Development</div><div class="srd">Custom GPT-powered chatbots for customer support, lead qualification, and appointment booking — 24/7 on any platform.</div><div class="srcta"><a href="#" data-p="contact">Start →</a></div></div>
+    <div class="svcrow sa"><div class="srn">04</div><div class="srt">Data Scraping & Research</div><div class="srd">Automated data extraction, competitor price monitoring, and market research bots — giving you the data edge to make smarter decisions faster.</div><div class="srcta"><a href="#" data-p="contact">Start →</a></div></div>
+    <div class="svcrow sa"><div class="srn">05</div><div class="srt">LangChain AI Agents</div><div class="srd">Advanced AI agents built with LangChain and RAG — capable of reasoning, searching the web, reading documents, and taking autonomous actions.</div><div class="srcta"><a href="#" data-p="contact">Start →</a></div></div>
+  </div>
+</section>
+
+<section class="proc">
+  <div class="stag sa">How It Works</div>
+  <h2 class="stitle sa">OUR <span style="color:var(--purple)">PROCESS</span></h2>
+  <div class="procgrid">
+    <div class="procs sa"><div class="psline"></div><div class="psn">01</div><div class="pst">Discovery Call</div><div class="psd">We understand your goals, current workflows, and what automation can solve.</div></div>
+    <div class="procs sa" style="transition-delay:.1s"><div class="psline"></div><div class="psn">02</div><div class="pst">Strategy & Plan</div><div class="psd">We map out the exact tools, timeline, and workflow needed to execute flawlessly.</div></div>
+    <div class="procs sa" style="transition-delay:.2s"><div class="psline"></div><div class="psn">03</div><div class="pst">Build & Test</div><div class="psd">We build, test, and refine every automation to ensure zero errors and peak performance.</div></div>
+    <div class="procs sa" style="transition-delay:.3s"><div class="psline"></div><div class="psn">04</div><div class="pst">Launch & Support</div><div class="psd">We deploy your solution and provide ongoing support to keep everything running.</div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft">
+    <div class="fb"><a href="#" class="logo" data-p="home">VEL<span>O</span>RIX</a><p>AI automation and eCommerce agency built for the modern digital economy.</p></div>
+    <div class="fc"><h4>Pages</h4><a href="#" data-p="home">Home</a><a href="#" data-p="about">About</a><a href="#" data-p="services">Services</a><a href="#" data-p="projects">Projects</a><a href="#" data-p="contact">Contact</a></div>
+    <div class="fc"><h4>Services</h4><a href="#" data-p="services">AI Automation</a><a href="#" data-p="services">eCommerce</a><a href="#" data-p="services">AI Chatbot</a><a href="#" data-p="services">Data Scraping</a></div>
+    <div class="fc"><h4>Contact</h4><a href="mailto:contact@velorix.com">contact@velorix.com</a><a href="#">+92 300 0000000</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+  </div>
+  <div class="fbot"><div class="fcopy">© 2025 Velorix. All rights reserved.</div><div class="fsoc"><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">GitHub</a></div></div>
+</footer>
+</div>
+
+<!-- ==================== PROJECTS ==================== -->
+<div id="p-projects" class="page">
+
+<section class="ph">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 80% 50%,rgba(123,47,247,.14) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="phi">
+    <div class="ph-tag">Our Work</div>
+    <h1 class="ph-title">OUR<br><span class="ph-outp">PROJECTS</span></h1>
+    <p class="ph-desc">Real automations. Real results. Here's what we've built for clients — and the impact it created.</p>
+  </div>
+</section>
+
+<section class="projsec">
+  <div class="stag sa">Case Studies</div>
+  <h2 class="stitle sa">RECENT <span style="color:var(--blue)">WORK</span></h2>
+  <div class="projgrid">
+    <div class="projc sp2 sa">
+      <div>
+        <div class="projbadge">eCommerce · eBay</div>
+        <h3 class="projt">EBAY DROPSHIPPING<br>AUTOMATION SYSTEM</h3>
+        <p class="projd">Full end-to-end eBay dropshipping system — automating product hunting from China, listing creation, price monitoring, and order fulfillment for USA & UK markets.</p>
+        <div class="projtechs"><div class="projtech">Python</div><div class="projtech">n8n</div><div class="projtech">eBay API</div><div class="projtech">Web Scraping</div></div>
+        <div class="projres">340%</div><div class="projresl">Revenue Increase in 3 Months</div>
+      </div>
+      <div class="projvis">01</div>
+    </div>
+    <div class="projc sa"><div class="projbg">02</div><div class="projbadge">AI · Chatbot</div><h3 class="projt">GPT CUSTOMER<br>SUPPORT BOT</h3><p class="projd">Custom AI chatbot handling 500+ daily queries — reducing support tickets by 80%.</p><div class="projtechs"><div class="projtech">GPT-4</div><div class="projtech">LangChain</div><div class="projtech">Python</div></div><div class="projres">80%</div><div class="projresl">Ticket Reduction</div></div>
+    <div class="projc sa"><div class="projbg">03</div><div class="projbadge">AI · Automation</div><h3 class="projt">N8N WORKFLOW<br>AUTOMATION SUITE</h3><p class="projd">15+ n8n workflows connecting CRM, email, Slack, and invoicing — running without human intervention.</p><div class="projtechs"><div class="projtech">n8n</div><div class="projtech">API Integration</div><div class="projtech">Webhooks</div></div><div class="projres">20hrs</div><div class="projresl">Saved Per Week</div></div>
+    <div class="projc sa"><div class="projbg">04</div><div class="projbadge">Data · Research</div><h3 class="projt">COMPETITOR PRICE<br>MONITOR BOT</h3><p class="projd">Automated price scraping — monitoring 10,000+ products daily across Amazon, eBay, and Walmart.</p><div class="projtechs"><div class="projtech">Python</div><div class="projtech">Selenium</div><div class="projtech">PostgreSQL</div></div><div class="projres">10K+</div><div class="projresl">Products Tracked Daily</div></div>
+  </div>
+</section>
+
+<section class="projcta">
+  <div class="sa">
+    <h2>YOUR PROJECT<br>COULD BE <span>NEXT</span></h2>
+    <p>Let's discuss your automation needs and build something that delivers real results.</p>
+    <a href="#" class="btn-glow" data-p="contact">Start Your Project</a>
+  </div>
+</section>
+
+<footer>
+  <div class="ft">
+    <div class="fb"><a href="#" class="logo" data-p="home">VEL<span>O</span>RIX</a><p>AI automation and eCommerce agency built for the modern digital economy.</p></div>
+    <div class="fc"><h4>Pages</h4><a href="#" data-p="home">Home</a><a href="#" data-p="about">About</a><a href="#" data-p="services">Services</a><a href="#" data-p="projects">Projects</a><a href="#" data-p="contact">Contact</a></div>
+    <div class="fc"><h4>Services</h4><a href="#" data-p="services">AI Automation</a><a href="#" data-p="services">eCommerce</a><a href="#" data-p="services">AI Chatbot</a><a href="#" data-p="services">Data Scraping</a></div>
+    <div class="fc"><h4>Contact</h4><a href="mailto:contact@velorix.com">contact@velorix.com</a><a href="#">+92 300 0000000</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+  </div>
+  <div class="fbot"><div class="fcopy">© 2025 Velorix. All rights reserved.</div><div class="fsoc"><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">GitHub</a></div></div>
+</footer>
+</div>
+
+<!-- ==================== CONTACT ==================== -->
+<div id="p-contact" class="page">
+
+<section class="chero">
+  <div class="chc">
+    <div class="chtag">Get In Touch</div>
+    <h1 class="chtitle">LET'S<br><span class="chout">WORK</span><br>TOGETHER</h1>
+    <p class="chdesc">Ready to automate your business? Tell us about your project and we'll get back within 24 hours.</p>
+  </div>
+  <div class="chrobot">
+    <div class="spw" style="height:100%;">
+      <iframe src='https://my.spline.design/genkubgreetingrobot-wCrJCz6LpOv6WLCutfaqq1ja/' allow="autoplay"></iframe>
+      <div class="spc spc-k"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cmain">
+  <div class="sa sl">
+    <div class="cftag">Send A Message</div>
+    <h2 class="cftitle">START YOUR<br><span>PROJECT</span></h2>
+    <div class="cform">
+      <div class="frow">
+        <div class="fg"><label>First Name</label><input type="text" placeholder="John"/></div>
+        <div class="fg"><label>Last Name</label><input type="text" placeholder="Doe"/></div>
+      </div>
+      <div class="fg"><label>Email Address</label><input type="email" placeholder="john@example.com"/></div>
+      <div class="fg"><label>WhatsApp / Phone</label><input type="text" placeholder="+1 234 567 8900"/></div>
+      <div class="fg"><label>Service Needed</label><select><option value="">Select a service...</option><option>AI Automation</option><option>eCommerce Automation</option><option>AI Chatbot Development</option><option>Data Scraping & Research</option><option>LangChain AI Agent</option><option>Other</option></select></div>
+      <div class="fg"><label>Budget Range</label><select><option value="">Select budget...</option><option>$100 – $500</option><option>$500 – $1,000</option><option>$1,000 – $5,000</option><option>$5,000+</option></select></div>
+      <div class="fg"><label>Project Details</label><textarea placeholder="Tell us about your project, goals, and timeline..."></textarea></div>
+      <button class="subbtn">Send Message →</button>
+    </div>
+  </div>
+  <div class="ciwrap sa sr">
+    <h3>CONTACT INFO</h3>
+    <p>Reach us through any of these channels. We respond within a few hours.</p>
+    <div class="ciitem"><div class="ciico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="cilbl">Email</div><div class="cival">contact@velorix.com</div></div></div>
+    <div class="ciitem"><div class="ciico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div><div class="cilbl">WhatsApp</div><div class="cival">+92 300 0000000</div></div></div>
+    <div class="ciitem"><div class="ciico"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div><div><div class="cilbl">Instagram</div><div class="cival">@velorix.official</div></div></div>
+    <div class="ciitem"><div class="ciico"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div><div><div class="cilbl">LinkedIn</div><div class="cival">velorix-solutions</div></div></div>
+    <div class="ciitem"><div class="ciico"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div><div><div class="cilbl">GitHub</div><div class="cival">velorix-solutions</div></div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft">
+    <div class="fb"><a href="#" class="logo" data-p="home">VEL<span>O</span>RIX</a><p>AI automation and eCommerce agency built for the modern digital economy.</p></div>
+    <div class="fc"><h4>Pages</h4><a href="#" data-p="home">Home</a><a href="#" data-p="about">About</a><a href="#" data-p="services">Services</a><a href="#" data-p="projects">Projects</a><a href="#" data-p="contact">Contact</a></div>
+    <div class="fc"><h4>Services</h4><a href="#" data-p="services">AI Automation</a><a href="#" data-p="services">eCommerce</a><a href="#" data-p="services">AI Chatbot</a><a href="#" data-p="services">Data Scraping</a></div>
+    <div class="fc"><h4>Contact</h4><a href="mailto:contact@velorix.com">contact@velorix.com</a><a href="#">+92 300 0000000</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+  </div>
+  <div class="fbot"><div class="fcopy">© 2025 Velorix. All rights reserved.</div><div class="fsoc"><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">GitHub</a></div></div>
+</footer>
+</div>
 
 <script>
-  // Cursor
-  const cur = document.getElementById('cur');
-  const ring = document.getElementById('cur-ring');
-  document.addEventListener('mousemove', e => {
-    cur.style.transform = `translate(${e.clientX-5}px,${e.clientY-5}px)`;
-    ring.style.transform = `translate(${e.clientX-16}px,${e.clientY-16}px)`;
+// Cursor
+const c=document.getElementById('cur'),r=document.getElementById('cur-ring');
+document.addEventListener('mousemove',e=>{
+  c.style.transform=`translate(${e.clientX-5}px,${e.clientY-5}px)`;
+  r.style.transform=`translate(${e.clientX-16}px,${e.clientY-16}px)`;
+});
+
+// Page Router
+function goTo(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  const pg=document.getElementById('p-'+p);
+  if(pg){pg.classList.add('active');}
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.toggle('active',a.dataset.p===p));
+  window.scrollTo({top:0,behavior:'instant'});
+  setTimeout(initSA,80);
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-p]');
+  if(el){e.preventDefault();goTo(el.dataset.p);}
+});
+
+// Scroll Animations
+function initSA(){
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);}
+  }),{threshold:.12});
+  document.querySelectorAll('.page.active .sa').forEach(el=>{
+    el.classList.remove('vis');obs.observe(el);
   });
-
-  // IntersectionObserver for scroll animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-
-  document.querySelectorAll('.scroll-anim').forEach(el => observer.observe(el));
+}
+initSA();
 </script>
 </body>
 </html>
